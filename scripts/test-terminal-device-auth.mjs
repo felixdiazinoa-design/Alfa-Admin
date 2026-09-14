@@ -116,7 +116,7 @@ assert.match(tenantsPage, /LIMPIAR/, 'UI must require strong confirmation for de
 assert.match(tenantsPage, /Autorizar y reemplazar/, 'UI must expose explicit replacement action');
 assert.match(tenantsPage, /Reparar enlace ERP/, 'UI must expose Cloud/ERP device mapping repair action');
 assert.match(tenantsPage, /!erpCurrentDeviceId \|\| authorizedDeviceId !== erpCurrentDeviceId/, 'ERP repair action must appear when ERP device is missing or mismatched');
-assert.match(tenantsPage, /El ERP debe confirmar explícitamente el takeover y la rotación/, 'manual device authorization must explain the canonical ERP confirmation requirement');
+assert.match(tenantsPage, /ALFA-RMS debe confirmar explícitamente el takeover y la rotación/, 'manual device authorization must explain the canonical ALFA-RMS confirmation requirement');
 assert.match(tenantsPage, /reason: 'CLOUD_ADMIN_TERMINAL_REAUTHORIZATION'/, 'manual POS_ERP authorization must use the canonical takeover reason');
 assert.match(tenantsPage, /requiresErpConfirmation/, 'UI must require ERP confirmation for POS_ERP authorization success');
 assert.match(tenantsPage, /normalized === 'TAKEOVER_COMPLETED'\) return 'WAITING_ERP_CONFIRMATION'/, 'UI must keep legacy takeover completed waiting for ERP confirmation');

@@ -223,7 +223,7 @@ Deno.serve(async (request) => {
             if (!targetEmail || !text(fields.full_name, 120)) throw new Error('Email y nombre son requeridos.');
             const existing = await client.from('cloud_admin_users').select('id').ilike('email', targetEmail).maybeSingle();
             if (existing.error) throw existing.error;
-            if (existing.data) throw new Error('Este usuario ya está registrado en Cloud-Admin.');
+            if (existing.data) throw new Error('Este usuario ya está registrado en ALFA-Admin.');
             const tempPassword = randomPassword();
             let authUser = await findAuthUser(client, targetEmail);
             let authLinkType: 'created' | 'linked_existing' = 'linked_existing';

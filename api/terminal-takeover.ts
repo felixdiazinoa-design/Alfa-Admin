@@ -480,7 +480,7 @@ export default async function handler(request: ApiRequest, response: ServerRespo
         if (!erpTenant) {
             sendJson(response, 404, {
                 error: "ERP_TENANT_NOT_FOUND",
-                message: "Tenant no encontrado en ERP para este tenant de Cloud-Admin.",
+                message: "Tenant no encontrado en ALFA-RMS para este tenant de ALFA-Admin.",
             });
             return;
         }

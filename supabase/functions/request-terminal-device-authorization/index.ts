@@ -1369,7 +1369,7 @@ Deno.serve(async (request) => {
             });
             return json({
                 error: 'DEVICE_ID_REQUIRED',
-                message: 'DEVICE_ID_REQUIRED: Cloud-Admin necesita un device_id autorizado antes de llamar ERP.',
+                message: 'DEVICE_ID_REQUIRED: ALFA-Admin necesita un device_id autorizado antes de llamar ALFA-RMS.',
             }, 400);
         }
 
@@ -1629,7 +1629,7 @@ Deno.serve(async (request) => {
                     success: true,
                     action: 'authorized_device_already_synced',
                     authorized_device_id: deviceId,
-                    message: 'El device autorizado ya estaba persistido en Cloud-Admin.',
+                    message: 'El device autorizado ya estaba persistido en ALFA-Admin.',
                 });
             }
 
@@ -1677,7 +1677,7 @@ Deno.serve(async (request) => {
                 success: true,
                 action: 'authorized_device_synced',
                 authorized_device_id: deviceId,
-                message: 'Device autorizado persistido en Cloud-Admin. El POS puede reintentar conexion.',
+                message: 'Device autorizado persistido en ALFA-Admin. El POS puede reintentar conexión.',
             });
         }
 
@@ -1691,7 +1691,7 @@ Deno.serve(async (request) => {
         const erpTenantId = action === 'TAKEOVER' || action === 'ROTATE_TOKEN'
             ? resolvedErpTenantId || await resolveErpTenantId(supabase, tenantId)
             : null;
-        // El takeover pertenece exclusivamente al ERP. Cloud Admin no corrige ni
+        // El takeover pertenece exclusivamente al ERP. ALFA-Admin no corrige ni
         // reasigna filas de erp_terminals antes de recibir una confirmación canónica.
         const preErpConsolidation = { archived: [], deleted: [], copied_auth: false };
 
@@ -1774,7 +1774,7 @@ Deno.serve(async (request) => {
                 action: 'device_revoked',
                 revoked_device_id: effectiveDeviceId,
                 authorized_device_id: effectiveAuthorizedDeviceId,
-                message: 'Equipo anterior marcado como revocado en Cloud-Admin.',
+                message: 'Equipo anterior marcado como revocado en ALFA-Admin.',
             });
         }
 
@@ -1895,7 +1895,7 @@ Deno.serve(async (request) => {
             });
             return json({
                 error: 'TAKEOVER_RESPONSE_AMBIGUOUS',
-                message: 'El ERP no confirmó la reautorización. Se consultó el estado canónico, pero Cloud Admin no mostrará éxito sin confirmación completa.',
+                message: 'ALFA-RMS no confirmó la reautorización. Se consultó el estado canónico, pero ALFA-Admin no mostrará éxito sin confirmación completa.',
                 operation_id: idempotencyKey,
                 canonical_reconciliation: reconciliation,
             }, 504);
@@ -1905,7 +1905,7 @@ Deno.serve(async (request) => {
             message: await erpResponse.text().catch(() => ''),
         }));
         const erpErrorCode = getErrorCode(erpPayload);
-        // Los conflictos se devuelven al cliente; Cloud Admin nunca libera o
+        // Los conflictos se devuelven al cliente; ALFA-Admin nunca libera o
         // reasigna directamente un device_id en las tablas ERP.
 
         if (!erpResponse.ok) {
@@ -2041,7 +2041,7 @@ Deno.serve(async (request) => {
                     new_device_id: newAuthorizedDeviceId,
                     action: 'CLOUD_ADMIN_DEVICE_MISMATCH_DETECTED',
                     performed_by: performedBy,
-                    reason: 'ERP persisted binding does not match Cloud-Admin requested device.',
+                    reason: 'ERP persisted binding does not match the device requested by ALFA-Admin.',
                     result: 'FAILED',
                     erp_response_status: erpResponse.status,
                     metadata: {
@@ -2059,7 +2059,7 @@ Deno.serve(async (request) => {
                 new_device_id: newAuthorizedDeviceId,
                 action: 'CLOUD_ADMIN_ERP_REPAIR_FAILED',
                 performed_by: performedBy,
-                reason: 'ERP did not confirm canonical terminal binding after Cloud-Admin request.',
+                reason: 'ERP did not confirm canonical terminal binding after the ALFA-Admin request.',
                 result: 'FAILED',
                 erp_response_status: erpResponse.status,
                 erp_error_code: erpBindingConfirmation.status,
@@ -2084,7 +2084,7 @@ Deno.serve(async (request) => {
                 deviceTokenStatus,
                 tokenPreview,
                 erp_confirmation: erpBindingConfirmation.checks,
-                message: 'ERP no confirmo que el device quedara autorizado en la terminal canonica. Cloud-Admin no marcara takeover completado hasta que ERP confirme.',
+                message: 'ALFA-RMS no confirmó que el device quedara autorizado en la terminal canónica. ALFA-Admin no marcará el takeover como completado hasta recibir confirmación.',
             }, 409);
         }
         const registryUpdate: Record<string, unknown> = {
@@ -2198,7 +2198,7 @@ Deno.serve(async (request) => {
             performed_by: performedBy,
             reason: action === 'ROTATE_TOKEN'
                 ? 'ERP confirmed token rotation on canonical terminal.'
-                : 'ERP confirmed canonical terminal binding after Cloud-Admin repair.',
+                : 'ERP confirmed canonical terminal binding after the ALFA-Admin repair.',
             result: 'SUCCESS',
             erp_response_status: erpResponse.status,
             metadata: {

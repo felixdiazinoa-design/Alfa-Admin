@@ -278,7 +278,7 @@ async function decryptSecret(row: IntegrationSecretRow) {
 }
 
 function formatFromAddress(name: string, email: string) {
-    const cleanName = name.trim() || 'Cloud Admin Soporte';
+    const cleanName = name.trim() || 'ALFA-Admin Soporte';
     return `${cleanName} <${email.trim().toLowerCase()}>`;
 }
 
@@ -287,7 +287,7 @@ async function loadIntegrationConfig(supabase: ReturnType<typeof createClient>):
         resendApiKey: Deno.env.get('RESEND_API_KEY'),
         openAiApiKey: Deno.env.get('OPENAI_API_KEY'),
         anthropicApiKey: Deno.env.get('ANTHROPIC_API_KEY'),
-        fromAddress: Deno.env.get('HELPDESK_FROM_EMAIL') ?? 'Cloud Admin Soporte <apoyotenico@mercasend.com>',
+        fromAddress: Deno.env.get('HELPDESK_FROM_EMAIL') ?? 'ALFA-Admin Soporte <apoyotenico@mercasend.com>',
         replyToAddress: Deno.env.get('HELPDESK_INBOUND_EMAIL') ?? 'apoyotenico@mercasend.com',
         aiProvider: 'openai',
         aiModel: Deno.env.get('OPENAI_MODEL') ?? DEFAULT_AI_MODEL,
@@ -321,7 +321,7 @@ async function loadIntegrationConfig(supabase: ReturnType<typeof createClient>):
         config.assignmentCopilotMode = row.assignment_copilot_mode ?? config.assignmentCopilotMode;
 
         if (row.resend_from_email) {
-            config.fromAddress = formatFromAddress(row.resend_from_name ?? 'Cloud Admin Soporte', row.resend_from_email);
+            config.fromAddress = formatFromAddress(row.resend_from_name === 'Cloud Admin Soporte' ? 'ALFA-Admin Soporte' : row.resend_from_name ?? 'ALFA-Admin Soporte', row.resend_from_email);
         }
         if (row.resend_inbound_email) config.replyToAddress = row.resend_inbound_email;
     } else if (settingsError) {
@@ -1376,7 +1376,7 @@ Deno.serve(async (request) => {
 
         const integrationConfig = await loadIntegrationConfig(supabase);
         if (!integrationConfig.resendApiKey) {
-            throw new Error('Missing Resend API key. Configure it in Cloud Admin or RESEND_API_KEY.');
+            throw new Error('Missing Resend API key. Configure it in ALFA-Admin or RESEND_API_KEY.');
         }
 
         const event = await request.json() as ResendInboundEvent;
