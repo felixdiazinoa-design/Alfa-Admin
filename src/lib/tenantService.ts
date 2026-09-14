@@ -1,5 +1,5 @@
-import { supabase, supabaseAdmin, supabaseProjectUrl } from "./supabase";
-import { invokeAdminCommand } from "./adminApi";
+import { supabase, supabaseAdmin, supabaseProjectUrl } from "./supabase.js";
+import { invokeAdminCommand } from "./adminApi.js";
 import type {
     Distributor,
     Tenant,
@@ -20,17 +20,17 @@ import type {
     TenantTerminalSnapshot,
     TenantType,
     Terminal,
-} from "../types";
+} from "../types.js";
 import {
     getTenantLicenseProvisioningMismatch,
     normalizeTenantLicenseLimit,
     type ProvisionTenantInput,
-} from "./tenantProvisioning";
+} from "./tenantProvisioning.js";
 import {
     deriveTenantSemanticsFromTenant,
     type TenantSemanticConfig,
-} from "./tenantProducts";
-import { buildTenantAuthMetadataPayload } from "./tenantAuthMetadata";
+} from "./tenantProducts.js";
+import { buildTenantAuthMetadataPayload } from "./tenantAuthMetadata.js";
 
 export interface DashboardStats {
     totalTenants: number;
