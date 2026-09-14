@@ -1,4 +1,5 @@
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "node:http";
+import { timingSafeEqual } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 
 type TenantType = "full" | "pos_only" | "erp_only";
@@ -142,6 +143,25 @@ function getEnv(...names: string[]) {
     }
 
     throw new Error(`Missing required environment variable: ${names.join(" or ")}`);
+}
+
+function getHeader(headers: IncomingHttpHeaders, name: string) {
+    const value = headers[name.toLowerCase()];
+    return Array.isArray(value) ? value[0] : value;
+}
+
+function extractBearerToken(request: ApiRequest) {
+    const authorization = getHeader(request.headers, "authorization") ?? "";
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
+    return match?.[1]?.trim() || null;
+}
+
+function tokensMatch(received: string, expected: string) {
+    const receivedBuffer = Buffer.from(received, "utf8");
+    const expectedBuffer = Buffer.from(expected, "utf8");
+
+    return receivedBuffer.length === expectedBuffer.length
+        && timingSafeEqual(receivedBuffer, expectedBuffer);
 }
 
 async function readBody(request: ApiRequest) {
@@ -404,6 +424,28 @@ export default async function handler(request: ApiRequest, response: ServerRespo
     }
 
     try {
+        let expectedProvisionToken: string;
+        try {
+            expectedProvisionToken = getEnv("CLOUD_ADMIN_PROVISION_TOKEN");
+        } catch {
+            sendJson(response, 503, {
+                status: "error",
+                code: "PROVISIONING_AUTH_NOT_CONFIGURED",
+                message: "El acceso servidor-a-servidor para provisioning no está configurado.",
+            });
+            return;
+        }
+
+        const bearerToken = extractBearerToken(request);
+        if (!bearerToken || !tokensMatch(bearerToken, expectedProvisionToken)) {
+            sendJson(response, 401, {
+                status: "error",
+                code: "UNAUTHORIZED",
+                message: "Credencial de provisioning inválida.",
+            });
+            return;
+        }
+
         const payload = await readBody(request) as ProvisionPayload;
         const requiredFields = ["name", "email", "slug", "password", "contactName", "contactEmail", "city"] as const;
         const missing = requiredFields.filter((field) => !isNonEmptyString(payload[field]));

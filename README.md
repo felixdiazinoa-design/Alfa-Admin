@@ -1,5 +1,13 @@
 # React + TypeScript + Vite
 
+## Provisioning desde ALFA-RMS
+
+El endpoint `POST /api/activation/provision-tenant` requiere autenticación
+servidor-a-servidor. Configura `CLOUD_ADMIN_PROVISION_TOKEN` en Vercel con un
+secreto aleatorio de alta entropía y usa el mismo valor como
+`CLOUD_ADMIN_API_TOKEN` únicamente en el backend de ALFA-RMS. Nunca expongas
+este valor con un prefijo `VITE_`.
+
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
