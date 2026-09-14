@@ -1,4 +1,5 @@
-import { supabase, supabaseAdmin, supabaseProjectUrl, supabaseServiceRoleKey } from "./supabase";
+import { supabase, supabaseAdmin, supabaseProjectUrl } from "./supabase";
+import { invokeAdminCommand } from "./adminApi";
 import type {
     Distributor,
     Tenant,
@@ -91,6 +92,15 @@ export interface DashboardInactiveTenant {
 }
 
 type CreateTenantInput = ProvisionTenantInput;
+
+const isBrowserRuntime = typeof window !== "undefined";
+
+async function getAdminAccessToken(): Promise<string> {
+    const { data } = await supabase.auth.getSession();
+    const accessToken = data.session?.access_token;
+    if (!accessToken) throw new Error("Sesión administrativa requerida.");
+    return accessToken;
+}
 
 type TenantUpdatePayload = {
     name: string;
@@ -896,36 +906,41 @@ function normalizeTenantSemantics(input: CreateTenantInput): TenantSemanticConfi
     return semantics;
 }
 
-export async function createTenant({
-    name,
-    slug,
-    email,
-    contactName,
-    contactEmail,
-    city,
-    capturedByDistributorId,
-    servicedByDistributorId,
-    plan = "TRIAL",
-    type = "full",
-    cloudSync = true,
-    contractedProduct,
-    posRuntime,
-    posVariant,
-    offlineMode,
-    explicitOffline,
-    cloudDisabledReason,
-    cloudChannel,
-    dataMaster,
-    cloudSyncEnabled,
-    erpCoreEnabled,
-    erpUiEnabled,
-    customerErpAccess,
-    backupEnabled,
-    lifecycleStatus,
-    provisioningStatus,
-    maxPosTerminals = 1,
-    maxErpUsers = 1,
-}: CreateTenantInput): Promise<{ tenantId: string; tempPassword: string }> {
+export async function createTenant(input: CreateTenantInput): Promise<{ tenantId: string; tempPassword: string }> {
+    if (isBrowserRuntime) {
+        return invokeAdminCommand("create_tenant", { input });
+    }
+
+    const {
+        name,
+        slug,
+        email,
+        contactName,
+        contactEmail,
+        city,
+        capturedByDistributorId,
+        servicedByDistributorId,
+        plan = "TRIAL",
+        type = "full",
+        cloudSync = true,
+        contractedProduct,
+        posRuntime,
+        posVariant,
+        offlineMode,
+        explicitOffline,
+        cloudDisabledReason,
+        cloudChannel,
+        dataMaster,
+        cloudSyncEnabled,
+        erpCoreEnabled,
+        erpUiEnabled,
+        customerErpAccess,
+        backupEnabled,
+        lifecycleStatus,
+        provisioningStatus,
+        maxPosTerminals = 1,
+        maxErpUsers = 1,
+    } = input;
     const accessEmail = email.trim().toLowerCase();
     const contactMail = contactEmail.trim().toLowerCase();
     const tempPassword = generateTempPassword();
@@ -1124,7 +1139,8 @@ export async function createTenant({
 }
 
 export async function verifyTenantEmail(token: string): Promise<void> {
-    const { error } = await supabaseAdmin.rpc("verify_tenant_email", { p_token: token });
+    const client = isBrowserRuntime ? supabase : supabaseAdmin;
+    const { error } = await client.rpc("verify_tenant_email", { p_token: token });
     if (error) throw error;
 }
 
@@ -1134,6 +1150,7 @@ export async function changeTenantPassword(newPassword: string): Promise<void> {
 }
 
 export async function getTenants(): Promise<Tenant[]> {
+    if (isBrowserRuntime) return invokeAdminCommand("get_tenants");
     const { data, error } = await supabaseAdmin
         .from("tenants")
         .select("*")
@@ -1148,6 +1165,7 @@ export async function getTenants(): Promise<Tenant[]> {
 }
 
 export async function updateTenantTaxId(id: string, taxId: string): Promise<void> {
+    if (isBrowserRuntime) return invokeAdminCommand("update_tenant_tax_id", { id, taxId });
     const { error } = await supabaseAdmin
         .from("tenants")
         .update({ tax_id: taxId.trim() })
@@ -1160,6 +1178,7 @@ export async function updateTenant(
     id: string,
     payload: TenantUpdatePayload,
 ): Promise<void> {
+    if (isBrowserRuntime) return invokeAdminCommand("update_tenant", { id, update: payload });
     const corePayload = pickTenantUpdateFields(payload, TENANT_CORE_UPDATE_COLUMNS);
     const semanticPayload = pickTenantUpdateFields(payload, TENANT_SEMANTIC_UPDATE_COLUMNS);
 
@@ -1204,6 +1223,7 @@ async function findTenantAuthUserId(tenant: Tenant): Promise<string | null> {
 }
 
 export async function deleteTenant(tenant: Tenant): Promise<void> {
+    if (isBrowserRuntime) return invokeAdminCommand("delete_tenant", { tenantId: tenant.id });
     const authUserId = await findTenantAuthUserId(tenant);
 
     const { error } = await supabaseAdmin.rpc("delete_tenant", {
@@ -1224,6 +1244,7 @@ export async function deleteTenant(tenant: Tenant): Promise<void> {
 }
 
 export async function getDistributors(): Promise<Distributor[]> {
+    if (isBrowserRuntime) return invokeAdminCommand("get_distributors");
     const { data, error } = await supabaseAdmin
         .from("distributors")
         .select("*")
@@ -1243,6 +1264,7 @@ export async function getDistributors(): Promise<Distributor[]> {
 }
 
 export async function getTenantTerminalOverview(tenantId: string): Promise<TenantTerminalSnapshot[]> {
+    if (isBrowserRuntime) return invokeAdminCommand("get_tenant_terminal_overview", { tenantId });
     const [terminalsRes, registryRes, tenantRes] = await Promise.all([
         supabaseAdmin
             .schema("public")
@@ -1572,7 +1594,7 @@ export async function requestTerminalTakeover(input: RequestTerminalTakeoverInpu
     const response = await fetch("/api/terminal-takeover", {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${supabaseServiceRoleKey}`,
+            Authorization: `Bearer ${await getAdminAccessToken()}`,
             "Content-Type": "application/json",
             "X-Actor-Source": "cloud-admin-ui",
         },
@@ -1601,7 +1623,7 @@ export async function requestTerminalLocalRebuild(input: RequestTerminalLocalReb
     const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${supabaseServiceRoleKey}`,
+            Authorization: `Bearer ${await getAdminAccessToken()}`,
             "Content-Type": "application/json",
             "X-Actor-Source": "cloud-admin-ui",
         },
@@ -1632,7 +1654,7 @@ export async function requestTerminalErpReadiness(input: RequestTerminalErpReadi
     const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${supabaseServiceRoleKey}`,
+            Authorization: `Bearer ${await getAdminAccessToken()}`,
             "Content-Type": "application/json",
             "X-Actor-Source": "cloud-admin-ui",
         },
@@ -1661,7 +1683,7 @@ export async function requestTerminalErpProfilePrepare(
     const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${supabaseServiceRoleKey}`,
+            Authorization: `Bearer ${await getAdminAccessToken()}`,
             "Content-Type": "application/json",
             "X-Actor-Source": "cloud-admin-ui",
         },
@@ -1690,7 +1712,7 @@ export async function getTerminalSyncPending(
     const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${supabaseServiceRoleKey}`,
+            Authorization: `Bearer ${await getAdminAccessToken()}`,
             "Content-Type": "application/json",
             "X-Actor-Source": "cloud-admin-ui",
         },
@@ -1720,7 +1742,7 @@ export async function retryTerminalSyncPending(
     const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${supabaseServiceRoleKey}`,
+            Authorization: `Bearer ${await getAdminAccessToken()}`,
             "Content-Type": "application/json",
             "X-Actor-Source": "cloud-admin-ui",
         },
@@ -1870,6 +1892,7 @@ export async function syncTerminalAuthorizedDevice(input: {
     registryId: string;
     deviceId: string;
 }): Promise<TerminalDeviceActionResult> {
+    if (isBrowserRuntime) return invokeAdminCommand("sync_terminal_authorized_device", { input });
     const deviceId = input.deviceId.trim();
     const { data: tenant, error: tenantError } = await supabaseAdmin
         .from("tenants")
@@ -2061,6 +2084,7 @@ export async function getTerminalDeviceAudit(
     terminalId: string,
     limit = 20,
 ): Promise<TerminalDeviceAuditEntry[]> {
+    if (isBrowserRuntime) return invokeAdminCommand("get_terminal_device_audit", { tenantId, terminalId, limit });
     const { data, error } = await supabaseAdmin
         .from("terminal_device_audit")
         .select("id,terminal_id,terminal_name,old_device_id,new_device_id,performed_by,performed_at,result,action,reason,erp_error_code,metadata")
@@ -2110,6 +2134,7 @@ export type TenantPosLicenseSeats = {
 };
 
 export async function getTenantPosLicenseSeats(tenantId: string): Promise<TenantPosLicenseSeats> {
+    if (isBrowserRuntime) return invokeAdminCommand("get_tenant_pos_license_seats", { tenantId });
     const { data, error } = await supabaseAdmin.rpc("count_tenant_pos_license_seats", {
         p_tenant_id: tenantId,
     });
@@ -2131,6 +2156,7 @@ export async function releaseTerminalLicenseSlot(input: {
     registryId: string;
     deviceId: string;
 }): Promise<{ message: string }> {
+    if (isBrowserRuntime) return invokeAdminCommand("release_terminal_license_slot", { input });
     const deviceId = input.deviceId.trim();
     const { data: tenant, error: tenantError } = await supabaseAdmin
         .from("tenants")
@@ -2238,6 +2264,7 @@ export async function releaseTerminalLicenseSlot(input: {
 }
 
 export async function enforceTenantPosLicenseLimits(tenantId: string): Promise<Record<string, unknown>> {
+    if (isBrowserRuntime) return invokeAdminCommand("enforce_tenant_pos_license_limits", { tenantId });
     const { data, error } = await supabaseAdmin.rpc("enforce_tenant_pos_license_limits", {
         p_tenant_id: tenantId,
     });
@@ -2248,6 +2275,7 @@ export async function enforceTenantPosLicenseLimits(tenantId: string): Promise<R
 
 /** Quita lifecycle BLOCKED dejado por readiness ERP fallido en tenants POS_ONLY. */
 export async function releasePosOnlyProvisioningBlock(tenantId: string): Promise<void> {
+    if (isBrowserRuntime) return invokeAdminCommand("release_pos_only_provisioning_block", { tenantId });
     const { error } = await supabaseAdmin
         .from("tenants")
         .update({
@@ -2266,7 +2294,7 @@ export async function getTerminalFiscalDebug(
     const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${supabaseServiceRoleKey}`,
+            Authorization: `Bearer ${await getAdminAccessToken()}`,
             "Content-Type": "application/json",
             "X-Actor-Source": "cloud-admin-ui",
         },
@@ -2297,7 +2325,7 @@ export async function getTerminalFiscalReadiness(
     const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${supabaseServiceRoleKey}`,
+            Authorization: `Bearer ${await getAdminAccessToken()}`,
             "Content-Type": "application/json",
             "X-Actor-Source": "cloud-admin-ui",
         },
@@ -2328,7 +2356,7 @@ export async function requestTerminalFiscalConfig(
     const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-            Authorization: `Bearer ${supabaseServiceRoleKey}`,
+            Authorization: `Bearer ${await getAdminAccessToken()}`,
             "Content-Type": "application/json",
             "X-Actor-Source": "cloud-admin-ui",
         },
@@ -2356,6 +2384,7 @@ export async function requestTerminalFiscalConfig(
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
+    if (isBrowserRuntime) return invokeAdminCommand("get_dashboard_stats");
     const [tenantsRes, terminalsRes, subscriptionRows, ticketRows] = await Promise.all([
         supabaseAdmin.from("tenants").select("id,name,status,created_at,last_sync_received_at,cloud_channel"),
         supabaseAdmin.schema("public").from("terminals").select("id", { count: "exact", head: true }),
@@ -2566,6 +2595,7 @@ function buildTenantGrowth(tenants: Array<Pick<Tenant, "created_at">>): Dashboar
 }
 
 export async function suspendTenant(id: string): Promise<void> {
+    if (isBrowserRuntime) return invokeAdminCommand("suspend_tenant", { id });
     const { error } = await supabaseAdmin
         .from("tenants")
         .update({ status: "SUSPENDED" })
@@ -2574,6 +2604,7 @@ export async function suspendTenant(id: string): Promise<void> {
 }
 
 export async function reactivateTenant(id: string): Promise<void> {
+    if (isBrowserRuntime) return invokeAdminCommand("reactivate_tenant", { id });
     const { error } = await supabaseAdmin
         .from("tenants")
         .update({ status: "ACTIVE" })
@@ -2585,6 +2616,7 @@ export async function updateTenantCredentials(
     tenantId: string,
     payload: { email?: string; password?: string }
 ): Promise<void> {
+    if (isBrowserRuntime) return invokeAdminCommand("update_tenant_credentials", { tenantId, update: payload });
     const { email, password } = payload;
     if (!email && !password) return;
 
@@ -2630,6 +2662,7 @@ export async function updateTenantCredentials(
 }
 
 export async function toggleTerminalActiveStatus(terminalId: string, isActive: boolean): Promise<void> {
+    if (isBrowserRuntime) return invokeAdminCommand("toggle_terminal_active_status", { terminalId, isActive });
     const { data: terminal, error: getErr } = await supabaseAdmin
         .schema("public")
         .from("erp_terminals")
@@ -2666,6 +2699,7 @@ export async function registerTenantServerEndpoint(payload: {
     appVersion?: string;
     appVersionCode?: number;
 }): Promise<void> {
+    if (isBrowserRuntime) return invokeAdminCommand("register_tenant_server_endpoint", { input: payload });
     const { error } = await supabaseAdmin.rpc("register_tenant_server_endpoint", {
         p_tenant_id: payload.tenantId,
         p_device_id: payload.deviceId,

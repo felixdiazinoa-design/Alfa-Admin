@@ -41,7 +41,7 @@ for (const envPath of defaultEnvPaths) {
 
     const env = loadEnv(envPath);
     const anonKey = env.VITE_SUPABASE_ANON_KEY;
-    const serviceKey = env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+    const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
     const anonRole = anonKey ? decodeJwtRole(anonKey) : null;
     const serviceRole = serviceKey ? decodeJwtRole(serviceKey) : null;
     const anonKind = anonKey?.startsWith("sb_publishable_") ? "publishable" : (anonRole || "unknown");
@@ -52,9 +52,9 @@ for (const envPath of defaultEnvPaths) {
     console.log(`\n[${envPath}]`);
     console.log(`- VITE_SUPABASE_ANON_KEY kind: ${anonKind}`);
     if (serviceKey) {
-        console.log(`- VITE_SUPABASE_SERVICE_ROLE_KEY kind: ${serviceKind}`);
+        console.log(`- SUPABASE_SERVICE_ROLE_KEY kind: ${serviceKind}`);
     } else {
-        console.log("- VITE_SUPABASE_SERVICE_ROLE_KEY kind: not set");
+        console.log("- SUPABASE_SERVICE_ROLE_KEY kind: not set");
     }
 
     if (!isPublicClientKey(anonKey)) {
@@ -63,7 +63,7 @@ for (const envPath of defaultEnvPaths) {
     }
     if (serviceKey && !isElevatedServerKey(serviceKey)) {
         hasError = true;
-        console.error("  ERROR: VITE_SUPABASE_SERVICE_ROLE_KEY is not service_role/sb_secret.");
+        console.error("  ERROR: SUPABASE_SERVICE_ROLE_KEY is not service_role/sb_secret.");
     }
     if (anonKey && serviceKey && anonKey === serviceKey) {
         hasError = true;
