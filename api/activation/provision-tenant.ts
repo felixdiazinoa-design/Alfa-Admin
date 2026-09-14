@@ -448,7 +448,7 @@ export default async function handler(request: ApiRequest, response: ServerRespo
 
         const supabase = createClient(
             getEnv("SUPABASE_URL", "VITE_SUPABASE_URL"),
-            getEnv("SUPABASE_SERVICE_ROLE_KEY", "VITE_SUPABASE_SERVICE_ROLE_KEY"),
+            getEnv("SUPABASE_SERVICE_ROLE_KEY"),
             {
                 auth: { autoRefreshToken: false, persistSession: false },
                 db: { schema: "landlord" },

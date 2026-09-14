@@ -1,4 +1,5 @@
-import { supabaseAdmin, supabaseProjectUrl, supabaseServiceRoleKey } from './supabase';
+import { supabase, supabaseAdmin, supabaseProjectUrl } from './supabase';
+import { invokeAdminCommand } from './adminApi';
 import type {
     CloudChannel,
     ContractedProduct,
@@ -413,10 +414,16 @@ async function safeSelect<T>(query: PromiseLike<{ data: unknown; error: unknown 
 async function loadErpTelemetry(): Promise<ErpTelemetryPayload> {
     const endpoint = `${supabaseProjectUrl.replace(/\/$/, '')}/functions/v1/get-operational-telemetry`;
     try {
+        const accessToken = typeof window === 'undefined'
+            ? (globalThis as typeof globalThis & {
+                process?: { env?: Record<string, string | undefined> };
+            }).process?.env?.SUPABASE_SERVICE_ROLE_KEY
+            : (await supabase.auth.getSession()).data.session?.access_token;
+        if (!accessToken) throw new Error('Sesión administrativa requerida.');
         const response = await fetch(endpoint, {
             method: 'GET',
             headers: {
-                Authorization: `Bearer ${supabaseServiceRoleKey}`,
+                Authorization: `Bearer ${accessToken}`,
                 'X-Actor-Source': 'cloud-admin-ui',
             },
         });
@@ -438,6 +445,9 @@ async function loadErpTelemetry(): Promise<ErpTelemetryPayload> {
 }
 
 export async function getOperationalObservability(filters: ObservabilityFilters): Promise<OperationalObservability> {
+    if (typeof window !== 'undefined') {
+        return invokeAdminCommand('get_operational_observability', { filters });
+    }
     const since = new Date(Date.now() - periodDays[filters.period] * 86400000);
     const [tenants, publicTerminals, erpTenants, erpStores, erpTerminals, registryRows, supportTickets, takeoverAudits, deviceAudits, telemetry] = await Promise.all([
         safeSelect<Tenant>(

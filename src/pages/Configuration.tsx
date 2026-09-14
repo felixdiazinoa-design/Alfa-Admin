@@ -9,7 +9,8 @@ import {
     ShieldCheck,
     Sparkles,
 } from 'lucide-react';
-import { supabaseAdmin, supabaseProjectUrl, supabaseServiceRoleKey } from '../lib/supabase';
+import { supabase, supabaseProjectUrl } from '../lib/supabase';
+import { invokeAdminCommand } from '../lib/adminApi';
 
 const functionName = 'process-inbound-email';
 const settingsEndpoint = '/api/save-integration-settings';
@@ -182,25 +183,18 @@ export const Configuration: React.FC = () => {
         let mounted = true;
 
         const loadConfiguration = async () => {
-            const { data: settingsData, error: settingsError } = await supabaseAdmin
-                .from('support_integration_settings')
-                .select('*')
-                .eq('id', 'helpdesk')
-                .maybeSingle();
-
-            if (!settingsError && settingsData && mounted) {
-                setSettings({ ...defaultSettings, ...settingsData });
-            }
-
-            const { data: secretData, error: secretError } = await supabaseAdmin
-                .from('support_integration_secrets')
-                .select('provider, secret_last4, updated_at');
-
-            if (!secretError && secretData && mounted) {
-                setSecretStatuses(secretData as SecretStatus[]);
-            }
-
-            if ((settingsError || secretError) && mounted) {
+            try {
+                const { settings: settingsData, secrets: secretData } = await invokeAdminCommand<{
+                    settings: Partial<IntegrationSettings> | null;
+                    secrets: SecretStatus[];
+                }>('get_integration_configuration');
+                if (!mounted) return;
+                if (settingsData) {
+                    setSettings({ ...defaultSettings, ...settingsData });
+                }
+                setSecretStatuses(secretData);
+            } catch {
+                if (!mounted) return;
                 setMessage('La configuración editable requiere aplicar la migración de integraciones.');
             }
         };
@@ -222,10 +216,13 @@ export const Configuration: React.FC = () => {
         setMessage('');
 
         try {
+            const { data: sessionData } = await supabase.auth.getSession();
+            const accessToken = sessionData.session?.access_token;
+            if (!accessToken) throw new Error('Sesión administrativa requerida.');
             const response = await fetch(settingsEndpoint, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${supabaseServiceRoleKey}`,
+                    'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -263,10 +260,8 @@ export const Configuration: React.FC = () => {
         setOpenAiApiKey('');
         setAnthropicApiKey('');
 
-        const { data } = await supabaseAdmin
-            .from('support_integration_secrets')
-            .select('provider, secret_last4, updated_at');
-        setSecretStatuses((data ?? []) as SecretStatus[]);
+        const refreshed = await invokeAdminCommand<{ secrets: SecretStatus[] }>('get_integration_configuration');
+        setSecretStatuses(refreshed.secrets);
     };
 
     return (
@@ -448,7 +443,7 @@ export const Configuration: React.FC = () => {
                     )}
                     <div className="mx-5 mb-5 flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-500">
                         <Sparkles size={15} className="mt-0.5 shrink-0 text-indigo-500" />
-                        Para habilitar esta pantalla en Vercel, define `INTEGRATION_SECRET_KEY`. Las variables `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` pueden usar los mismos valores ya configurados como `VITE_SUPABASE_URL` y `VITE_SUPABASE_SERVICE_ROLE_KEY`.
+                        Para habilitar esta pantalla en Vercel, define `INTEGRATION_SECRET_KEY`, `SUPABASE_URL` y la clave exclusivamente server-side `SUPABASE_SERVICE_ROLE_KEY`.
                     </div>
                 </section>
             </div>

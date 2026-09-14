@@ -4,7 +4,8 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { ForgotPasswordDialog } from './components/ForgotPasswordDialog'
 import { ResetPasswordScreen } from './components/ResetPasswordScreen'
-import { supabase, supabaseAdmin } from './lib/supabase'
+import { supabase } from './lib/supabase'
+import { invokeAdminCommand } from './lib/adminApi'
 import type { CloudAdminProfile, CloudAdminUser } from './types'
 import type { CloudAdminPermissionKey } from './types'
 import { hasCloudAdminPermission } from './lib/cloudAdminPermissions'
@@ -57,28 +58,14 @@ async function resolveCloudAdminSession(session: Session | null): Promise<CloudA
     const authUser = session?.user;
     if (!authUser?.id) return null;
 
-    const { data: adminUser, error: adminError } = await supabaseAdmin
-        .from('cloud_admin_users')
-        .select('*')
-        .eq('auth_user_id', authUser.id)
-        .maybeSingle();
+    const { adminUser, profile } = await invokeAdminCommand<{
+        adminUser: CloudAdminUser | null;
+        profile: CloudAdminProfile | null;
+    }>('session');
 
-    if (adminError) throw adminError;
-    if (!adminUser || (adminUser as CloudAdminUser).status === 'suspended') return null;
+    if (!adminUser || adminUser.status === 'suspended') return null;
 
-    let profile: CloudAdminProfile | null = null;
-    const profileId = (adminUser as CloudAdminUser).profile_id;
-    if (profileId) {
-        const { data: profileData, error: profileError } = await supabaseAdmin
-            .from('cloud_admin_profiles')
-            .select('*')
-            .eq('id', profileId)
-            .maybeSingle();
-        if (profileError) throw profileError;
-        profile = profileData as CloudAdminProfile | null;
-    }
-
-    return { authUser, adminUser: adminUser as CloudAdminUser, profile };
+    return { authUser, adminUser, profile };
 }
 
 function App() {

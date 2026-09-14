@@ -195,7 +195,7 @@ export default async function handler(request: ApiRequest, response: ServerRespo
         }
 
         const supabaseUrl = getEnv("SUPABASE_URL", "VITE_SUPABASE_URL");
-        const serviceRoleKey = getEnv("SUPABASE_SERVICE_ROLE_KEY", "VITE_SUPABASE_SERVICE_ROLE_KEY");
+        const serviceRoleKey = getEnv("SUPABASE_SERVICE_ROLE_KEY");
 
         const supabaseLandlord = createClient(supabaseUrl, serviceRoleKey, {
             auth: { autoRefreshToken: false, persistSession: false },

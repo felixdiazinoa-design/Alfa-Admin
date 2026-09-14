@@ -41,6 +41,7 @@ export type CloudAdminActor = {
     id: string;
     authUserId: string;
     email: string;
+    permissions: Record<string, boolean>;
 };
 
 export type CloudAdminSession = {
@@ -59,6 +60,18 @@ export class CloudAdminAuthError extends Error {
         this.code = code;
     }
 }
+
+const legacyPermissionFallback: Record<string, string> = {
+    dashboard_view: "dashboard",
+    tenants_view: "tenants",
+    tenants_manage: "tenants",
+    tenants_delete: "kill_switch",
+    observability_view: "observability",
+    settings_view: "settings",
+    settings_manage: "settings",
+    licenses_view: "plans_view",
+    licenses_manage: "plans_manage",
+};
 
 function requiredEnv(...names: string[]) {
     for (const name of names) {
@@ -80,6 +93,25 @@ function relation<T>(value: T | T[] | null | undefined): T | null {
 export async function requireCloudAdminPermission(
     headers: IncomingHttpHeaders,
     permission: string,
+): Promise<CloudAdminSession> {
+    const session = await requireCloudAdminSession(headers);
+    const explicitPermission = session.actor.permissions[permission];
+    const fallback = legacyPermissionFallback[permission];
+    const allowed = explicitPermission === true
+        || (typeof explicitPermission !== "boolean" && Boolean(fallback) && session.actor.permissions[fallback] === true);
+    if (!allowed) {
+        throw new CloudAdminAuthError(
+            403,
+            "FORBIDDEN",
+            "No tienes permiso para ejecutar esta operación administrativa.",
+        );
+    }
+
+    return session;
+}
+
+export async function requireCloudAdminSession(
+    headers: IncomingHttpHeaders,
 ): Promise<CloudAdminSession> {
     const authorization = headerValue(headers, "authorization") || "";
     const accessToken = authorization.replace(/^Bearer\s+/i, "").trim();
@@ -111,12 +143,11 @@ export async function requireCloudAdminPermission(
         !actor
         || actor.status !== "active"
         || profile?.is_active !== true
-        || profile.permissions?.[permission] !== true
     ) {
         throw new CloudAdminAuthError(
             403,
             "FORBIDDEN",
-            "No tienes permiso para reautorizar dispositivos de terminales.",
+            "Tu usuario no tiene acceso administrativo activo.",
         );
     }
 
@@ -126,6 +157,7 @@ export async function requireCloudAdminPermission(
             id: actor.id,
             authUserId: actor.auth_user_id,
             email: actor.email || authData.user.email || actor.auth_user_id,
+            permissions: profile.permissions || {},
         },
     };
 }

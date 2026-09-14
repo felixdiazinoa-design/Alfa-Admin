@@ -40,7 +40,7 @@ import {
     WifiOff,
     X,
 } from 'lucide-react';
-import { authorizeAdminRealtime, supabaseAdmin } from '../lib/supabase';
+import { authorizeAdminRealtime, supabase } from '../lib/supabase';
 import {
     addPrivateHelpdeskNote,
     addPublicHelpdeskReply,
@@ -921,7 +921,7 @@ const SupportCommandCenter: React.FC = () => {
         const refreshTimers = new Map<string, number>();
         let searchRefreshTimer: number | undefined;
         let mounted = true;
-        let channel: ReturnType<typeof supabaseAdmin.channel> | null = null;
+        let channel: ReturnType<typeof supabase.channel> | null = null;
 
         const removeTicket = (ticketId: string) => {
             setTickets((current) => current.filter((ticket) => ticket.id !== ticketId));
@@ -1016,7 +1016,7 @@ const SupportCommandCenter: React.FC = () => {
             await authorizeAdminRealtime();
             if (!mounted) return;
 
-            channel = supabaseAdmin
+            channel = supabase
                 .channel('cloud-admin:helpdesk', {
                     config: { private: true },
                 })
@@ -1037,7 +1037,7 @@ const SupportCommandCenter: React.FC = () => {
             refreshTimers.forEach((timer) => window.clearTimeout(timer));
             window.clearTimeout(searchRefreshTimer);
             if (channel) {
-                void supabaseAdmin.removeChannel(channel);
+                void supabase.removeChannel(channel);
             }
         };
     }, []);
@@ -1058,7 +1058,7 @@ const SupportCommandCenter: React.FC = () => {
 
         let mounted = true;
         let messageRefreshTimer: number | undefined;
-        let msgChannel: ReturnType<typeof supabaseAdmin.channel> | null = null;
+        let msgChannel: ReturnType<typeof supabase.channel> | null = null;
 
         const fetchMessages = async () => {
             try {
@@ -1092,7 +1092,7 @@ const SupportCommandCenter: React.FC = () => {
             await authorizeAdminRealtime();
             if (!mounted) return;
 
-            msgChannel = supabaseAdmin
+            msgChannel = supabase
                 .channel(`cloud-admin:helpdesk:ticket:${selectedTicketId}`, {
                     config: { private: true },
                 })
@@ -1116,7 +1116,7 @@ const SupportCommandCenter: React.FC = () => {
             mounted = false;
             window.clearTimeout(messageRefreshTimer);
             if (msgChannel) {
-                void supabaseAdmin.removeChannel(msgChannel);
+                void supabase.removeChannel(msgChannel);
             }
         };
     }, [selectedTicketId]);

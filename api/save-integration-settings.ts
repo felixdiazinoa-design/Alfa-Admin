@@ -1,6 +1,7 @@
 import { createHash, createCipheriv, randomBytes } from 'node:crypto';
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http';
 import { createClient } from '@supabase/supabase-js';
+import { requireCloudAdminPermission, CloudAdminAuthError } from './lib/cloud-admin-session.js';
 
 interface IntegrationSettingsPayload {
     resend_inbound_email?: string;
@@ -73,11 +74,6 @@ function getEnv(...names: string[]) {
     throw new Error(`Missing required environment variable: ${names.join(' or ')}`);
 }
 
-function getHeader(headers: IncomingHttpHeaders, name: string) {
-    const value = headers[name.toLowerCase()];
-    return Array.isArray(value) ? value[0] : value;
-}
-
 async function readBody(request: ApiRequest) {
     if (request.body) {
         return typeof request.body === 'string' ? JSON.parse(request.body) : request.body;
@@ -90,22 +86,6 @@ async function readBody(request: ApiRequest) {
 
     const rawBody = Buffer.concat(chunks).toString('utf8');
     return rawBody ? JSON.parse(rawBody) : {};
-}
-
-function isAuthorizedConfigurationRequest(request: ApiRequest) {
-    const expectedToken = process.env.CONFIG_ADMIN_TOKEN;
-    const receivedToken = getHeader(request.headers, 'x-config-admin-token');
-
-    if (expectedToken && receivedToken === expectedToken) {
-        return true;
-    }
-
-    const authorization = getHeader(request.headers, 'authorization') ?? '';
-    const bearerToken = authorization.replace(/^Bearer\s+/i, '').trim();
-    if (!bearerToken) return false;
-
-    const serviceRoleKey = getEnv('SUPABASE_SERVICE_ROLE_KEY', 'VITE_SUPABASE_SERVICE_ROLE_KEY');
-    return bearerToken === serviceRoleKey;
 }
 
 function encryptSecret(value: string) {
@@ -177,15 +157,12 @@ export default async function handler(request: ApiRequest, response: ServerRespo
     }
 
     try {
-        if (!isAuthorizedConfigurationRequest(request)) {
-            sendJson(response, 401, { error: 'Unauthorized configuration request' });
-            return;
-        }
+        await requireCloudAdminPermission(request.headers, 'settings_manage');
 
         const payload = await readBody(request) as SavePayload;
         const supabase = createClient(
-            getEnv('SUPABASE_URL', 'VITE_SUPABASE_URL'),
-            getEnv('SUPABASE_SERVICE_ROLE_KEY', 'VITE_SUPABASE_SERVICE_ROLE_KEY'),
+            getEnv('SUPABASE_URL'),
+            getEnv('SUPABASE_SERVICE_ROLE_KEY'),
             {
                 auth: { autoRefreshToken: false, persistSession: false },
                 db: { schema: 'landlord' },
@@ -206,6 +183,10 @@ export default async function handler(request: ApiRequest, response: ServerRespo
 
         sendJson(response, 200, { ok: true, secrets_changed: secretsChanged });
     } catch (error) {
+        if (error instanceof CloudAdminAuthError) {
+            sendJson(response, error.status, { error: error.code, detail: error.message });
+            return;
+        }
         console.error('save-integration-settings failed', error);
         sendJson(response, 500, {
             error: 'Could not save integration settings',

@@ -1,5 +1,6 @@
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from 'node:http';
 import { createClient } from '@supabase/supabase-js';
+import { requireCloudAdminPermission, CloudAdminAuthError } from '../lib/cloud-admin-session.js';
 
 const SYNC_MODES = ['POS_LOCAL', 'POS_ERP', 'POS_SLAVE'] as const;
 
@@ -31,11 +32,6 @@ function getEnv(...names: string[]): string {
     throw new Error(`Missing required environment variable: ${names.join(' or ')}`);
 }
 
-function getHeader(headers: IncomingHttpHeaders, name: string): string | undefined {
-    const value = headers[name.toLowerCase()];
-    return Array.isArray(value) ? value[0] : value;
-}
-
 async function readBody(request: ApiRequest): Promise<unknown> {
     if (request.body) {
         return typeof request.body === 'string' ? JSON.parse(request.body) : request.body;
@@ -52,21 +48,6 @@ async function readBody(request: ApiRequest): Promise<unknown> {
 
 function isSyncMode(value: unknown): value is SyncMode {
     return typeof value === 'string' && SYNC_MODES.includes(value as SyncMode);
-}
-
-function isAuthorizedAdminRequest(request: ApiRequest): boolean {
-    const expectedToken = process.env.CONFIG_ADMIN_TOKEN;
-    const receivedToken = getHeader(request.headers, 'x-config-admin-token');
-
-    if (expectedToken && receivedToken === expectedToken) {
-        return true;
-    }
-
-    const authorization = getHeader(request.headers, 'authorization') ?? '';
-    const bearerToken = authorization.replace(/^Bearer\s+/i, '').trim();
-    if (!bearerToken) return false;
-
-    return bearerToken === getEnv('SUPABASE_SERVICE_ROLE_KEY', 'VITE_SUPABASE_SERVICE_ROLE_KEY');
 }
 
 function formatUnknownError(error: unknown): string {
@@ -92,10 +73,7 @@ export default async function handler(request: ApiRequest, response: ServerRespo
     }
 
     try {
-        if (!isAuthorizedAdminRequest(request)) {
-            sendJson(response, 401, { error: 'Unauthorized admin request' });
-            return;
-        }
+        await requireCloudAdminPermission(request.headers, 'tenants_manage');
 
         const payload = await readBody(request) as TenantSyncModePayload;
         const tenantId = typeof payload.tenantId === 'string' ? payload.tenantId.trim() : '';
@@ -111,8 +89,8 @@ export default async function handler(request: ApiRequest, response: ServerRespo
         }
 
         const supabase = createClient(
-            getEnv('SUPABASE_URL', 'VITE_SUPABASE_URL'),
-            getEnv('SUPABASE_SERVICE_ROLE_KEY', 'VITE_SUPABASE_SERVICE_ROLE_KEY'),
+            getEnv('SUPABASE_URL'),
+            getEnv('SUPABASE_SERVICE_ROLE_KEY'),
             {
                 auth: { autoRefreshToken: false, persistSession: false },
             },
@@ -129,6 +107,10 @@ export default async function handler(request: ApiRequest, response: ServerRespo
 
         sendJson(response, 200, { ok: true, tenant: data });
     } catch (error) {
+        if (error instanceof CloudAdminAuthError) {
+            sendJson(response, error.status, { error: error.code, detail: error.message });
+            return;
+        }
         console.error('tenant-sync-mode update failed', error);
         sendJson(response, 500, {
             error: 'Could not update tenant sync mode',

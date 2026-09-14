@@ -249,4 +249,4 @@ SUPABASE_PROJECT_REF=cdfdgxejnbznjxuokrrx
 
 ## Nota De Seguridad
 
-Actualmente el frontend usa `VITE_SUPABASE_SERVICE_ROLE_KEY` para operaciones administrativas. Esto funciona, pero no es una arquitectura segura a largo plazo. El PR deberia planificar mover operaciones privilegiadas a Edge Functions o backend server-side.
+Las operaciones privilegiadas deben permanecer en Edge Functions o funciones backend. El frontend solo puede recibir la URL de Supabase y una clave pública (`anon` o `publishable`); la clave `SUPABASE_SERVICE_ROLE_KEY` es exclusivamente server-side.
