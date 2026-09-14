@@ -2,7 +2,7 @@
 
 **Versión:** 1.0  
 **Fecha de verificación:** 2026-08-10  
-**Productos:** CLIC-POS, CLIC-ERP y Cloud-Admin  
+**Productos:** ALFA-RMS POS, ALFA-RMS y ALFA-Admin
 **Uso:** base de conocimiento recuperable para clasificación, borradores y respuestas autónomas gobernadas.
 
 ## 1. Propósito y forma de uso
@@ -23,7 +23,7 @@ Reglas obligatorias para Copilot:
 
 Solicitar solamente lo que falte:
 
-- Producto afectado: CLIC-POS, CLIC-ERP o Cloud-Admin.
+- Producto afectado: ALFA-RMS POS, ALFA-RMS o ALFA-Admin.
 - Empresa/tenant y sucursal.
 - Nombre o identificador visible de la terminal, si aplica.
 - Versión de la aplicación y `versionCode`, si están disponibles.
@@ -39,11 +39,11 @@ Fuentes verificadas:
 - `Cloud-Admin/supabase/functions/_shared/helpdesk-autonomy.ts`
 - `Cloud-Admin/supabase/functions/generate-support-draft/index.ts`
 
-## 3. CLIC-POS
+## 3. ALFA-RMS POS
 
 ### 3.1 Arquitectura offline-first y protección de la cola local
 
-CLIC-POS opera localmente y sincroniza con el ERP en segundo plano. En Android usa SQLite nativo; en web usa IndexedDB. Una caída de Internet no implica que las ventas locales deban borrarse.
+ALFA-RMS POS opera localmente y sincroniza con ALFA-RMS en segundo plano. En Android usa SQLite nativo; en web usa IndexedDB. Una caída de Internet no implica que las ventas locales deban borrarse.
 
 Procedimiento de soporte:
 
@@ -68,8 +68,8 @@ La pantalla **Activación** usa el email registrado y la contraseña temporal. E
 Si falla:
 
 1. Confirmar que el email corresponde al tenant esperado.
-2. Copiar el mensaje exacto y comprobar conectividad hacia Cloud Admin/Supabase.
-3. Si el mensaje dice que no se pudo resolver la licencia, escalar para reprovisionar el tenant en Cloud Admin.
+2. Copiar el mensaje exacto y comprobar conectividad hacia ALFA-Admin/Supabase.
+3. Si el mensaje dice que no se pudo resolver la licencia, escalar para reprovisionar el tenant en ALFA-Admin.
 4. Si el APK indica que no incluye credenciales Supabase, volver a **Elegir tipo de POS**; no editar archivos internos del dispositivo.
 
 No solicitar la contraseña temporal en el ticket.
@@ -97,7 +97,7 @@ Fuentes verificadas:
 
 El diagnóstico distingue, entre otros, `DEVICE_NOT_AUTHORIZED`, `FISCAL_CONFIG_MISSING`, `ERP_MASTER_PULL_FAILED` y `SYNC_COLLECTION_PULL_FAILED`. La acción correcta depende del código:
 
-- `DEVICE_NOT_AUTHORIZED`: escalar para autorizar el dispositivo correcto en Cloud-Admin; no reutilizar el identificador de otra caja.
+- `DEVICE_NOT_AUTHORIZED`: escalar para autorizar el dispositivo correcto en ALFA-Admin; no reutilizar el identificador de otra caja.
 - `FISCAL_CONFIG_MISSING`: validar serie, rango y configuración fiscal de la terminal antes de emitir fiscalmente.
 - Fallo de colección maestra: registrar colección, endpoint, estado HTTP, terminal y hora; reintentar la colección una vez.
 - Error de red: confirmar URL/host accesible y conectividad antes de modificar credenciales.
@@ -150,7 +150,7 @@ Antes de finalizar, el POS valida método de pago, permisos, conexión con la Te
 
 Fuente verificada: `CLIC-POS/components/PaymentModal.tsx`.
 
-## 4. CLIC-ERP
+## 4. ALFA-RMS
 
 ### 4.1 Vinculación o reemplazo de una terminal
 
@@ -248,11 +248,11 @@ Fuentes verificadas:
 - `CLIC-ERP/src/hooks/usePermissions.ts`
 - `CLIC-ERP/server/middlewares/rbac.js`
 
-## 5. Cloud-Admin
+## 5. ALFA-Admin
 
 ### 5.1 Dispositivo no autorizado o cambio de equipo
 
-En **Empresas > Terminales**, Cloud-Admin muestra el dispositivo reportado y el autorizado. Autorizar o reautorizar sustituye el equipo permitido para esa terminal; el anterior deja de sincronizar como esa caja.
+En **Empresas > Terminales**, ALFA-Admin muestra el dispositivo reportado y el autorizado. Autorizar o reautorizar sustituye el equipo permitido para esa terminal; el anterior deja de sincronizar como esa caja.
 
 Antes de la acción administrativa:
 
@@ -266,7 +266,7 @@ Fuente verificada: `Cloud-Admin/src/pages/Tenants.tsx`.
 
 ### 5.2 Perfil ERP incompleto y documentos pendientes
 
-Cuando un documento falla con `ERP_CONTEXT_MISSING`, Cloud-Admin permite **Preparar perfil ERP** y luego reintentar el documento. El reintento masivo está bloqueado mientras el perfil siga incompleto.
+Cuando un documento falla con `ERP_CONTEXT_MISSING`, ALFA-Admin permite **Preparar perfil ALFA-RMS** y luego reintentar el documento. El reintento masivo está bloqueado mientras el perfil siga incompleto.
 
 Orden seguro:
 

@@ -418,10 +418,10 @@ export function buildDeviceMismatchWarning(
     const erp = normalizeDeviceId(erpCurrentDeviceId);
 
     if (pos && authorized && pos !== authorized) {
-        return `El POS reporta ${posReportedDeviceId}, pero Cloud-Admin muestra ${authorizedDeviceId} como autorizado. Puede requerir takeover o actualizacion de autorizacion.`;
+        return `El POS reporta ${posReportedDeviceId}, pero ALFA-Admin muestra ${authorizedDeviceId} como autorizado. Puede requerir takeover o actualización de autorización.`;
     }
     if (erp && authorized && erp !== authorized) {
-        return `ERP muestra ${erpCurrentDeviceId} como device actual, pero Cloud-Admin tiene autorizado ${authorizedDeviceId}. Valida el mapping en ERP antes de forzar takeover.`;
+        return `ALFA-RMS muestra ${erpCurrentDeviceId} como device actual, pero ALFA-Admin tiene autorizado ${authorizedDeviceId}. Valida el mapping en ALFA-RMS antes de forzar takeover.`;
     }
     if (pos && erp && pos !== erp) {
         return `El POS reporta ${posReportedDeviceId} y ERP muestra ${erpCurrentDeviceId}. Soporte debe alinear autorizacion, ERP y heartbeat del POS.`;

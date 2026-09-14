@@ -208,7 +208,7 @@ export function ErpModuleStoreModal({
                             {!overview.tenant.erp_enabled ? (
                                 <div className="flex gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                                     <AlertCircle className="mt-0.5 shrink-0" size={18} />
-                                    <div><p className="font-black">CLIC ERP no está activo</p><p className="mt-1">Activa CLIC ERP y guarda los cambios del tenant antes de habilitar módulos adicionales.</p></div>
+                                    <div><p className="font-black">ALFA-RMS no está activo</p><p className="mt-1">Activa ALFA-RMS y guarda los cambios del tenant antes de habilitar módulos adicionales.</p></div>
                                 </div>
                             ) : (
                                 <div className="rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm text-indigo-800">

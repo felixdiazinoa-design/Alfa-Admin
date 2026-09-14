@@ -438,7 +438,7 @@ export const PosApkReleases: React.FC<{ canManage: boolean }> = ({ canManage }) 
                                     : 'Promueve una versión a Disponible para habilitar las actualizaciones automáticas.'}
                             </p>
                             <div className="mt-2 rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-1.5">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Link Cloud-Admin</p>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Enlace ALFA-Admin</p>
                                 <p className="mt-0.5 truncate font-mono text-[11px] text-slate-600" title={latestApkDownloadUrl}>{latestApkDownloadUrl}</p>
                             </div>
                         </div>

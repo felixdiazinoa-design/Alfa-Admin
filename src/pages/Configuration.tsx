@@ -38,7 +38,7 @@ interface SecretStatus {
 
 const defaultSettings: IntegrationSettings = {
     resend_inbound_email: 'apoyotenico@mercasend.com',
-    resend_from_name: 'Cloud Admin Soporte',
+    resend_from_name: 'ALFA-Admin Soporte',
     resend_from_email: 'apoyotenico@mercasend.com',
     ai_provider: 'openai',
     ai_model: 'gpt-4o-mini-2024-07-18',
@@ -190,7 +190,13 @@ export const Configuration: React.FC = () => {
                 }>('get_integration_configuration');
                 if (!mounted) return;
                 if (settingsData) {
-                    setSettings({ ...defaultSettings, ...settingsData });
+                    setSettings({
+                        ...defaultSettings,
+                        ...settingsData,
+                        resend_from_name: settingsData.resend_from_name === 'Cloud Admin Soporte'
+                            ? 'ALFA-Admin Soporte'
+                            : settingsData.resend_from_name || defaultSettings.resend_from_name,
+                    });
                 }
                 setSecretStatuses(secretData);
             } catch {

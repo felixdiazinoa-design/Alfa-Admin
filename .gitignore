@@ -29,3 +29,5 @@ supabase/.temp
 *.sln
 *.sw?
 .env*
+!.env.example
+!.env.*.example

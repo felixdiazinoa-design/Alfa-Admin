@@ -94,7 +94,7 @@ function App() {
                 setCloudAdminSession(resolved);
                 setAuthStatus(resolved ? 'authenticated' : 'unauthenticated');
                 if (data.session && !resolved) {
-                    setAuthError('Tu usuario no tiene acceso activo a Cloud-Admin.');
+                    setAuthError('Tu usuario no tiene acceso activo a ALFA-Admin.');
                     await supabase.auth.signOut();
                     clearSupabaseAuthStorage();
                 }
@@ -160,7 +160,7 @@ function App() {
         if (!resolved) {
             await supabase.auth.signOut();
             clearSupabaseAuthStorage();
-            throw new Error('Tu usuario no tiene acceso activo a Cloud-Admin.');
+            throw new Error('Tu usuario no tiene acceso activo a ALFA-Admin.');
         }
 
         setCloudAdminSession(resolved);
@@ -222,7 +222,7 @@ function App() {
                         <Layout
                             adminName={cloudAdminSession.adminUser.full_name}
                             adminEmail={cloudAdminSession.adminUser.email || cloudAdminSession.authUser.email}
-                            adminRole={cloudAdminSession.profile?.name || 'Cloud Admin'}
+                            adminRole={cloudAdminSession.profile?.name || 'Administrador de plataforma'}
                             permissions={permissions}
                             signingOut={signingOut}
                             onSignOut={() => void handleSignOut()}
@@ -267,18 +267,22 @@ function PermissionGate({ allowed, children }: { allowed: boolean; children: Rea
 
 function PageLoadingScreen() {
     return (
-        <div className="flex min-h-[40vh] items-center justify-center text-sm font-bold text-slate-500">
-            Cargando módulo...
+        <div className="flex min-h-[40vh] items-center justify-center gap-3 text-sm font-bold text-brand-text-muted">
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-brand-soft border-t-brand" aria-hidden="true" />
+            Cargando módulo…
         </div>
     );
 }
 
 function AuthLoadingScreen() {
     return (
-        <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-            <div className="rounded-lg border border-white/10 bg-white/5 px-6 py-5 shadow-2xl">
-                <p className="text-sm font-bold uppercase tracking-[0.24em] text-indigo-300">CLIC-CLOUD</p>
-                <p className="mt-2 text-lg font-black">Validando sesión...</p>
+        <div className="flex min-h-screen items-center justify-center bg-brand-sidebar-deep px-4 text-white">
+            <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-5 shadow-xl">
+                <img src="/alfa-admin-mark-inverse.svg" alt="" className="h-11 w-11" />
+                <div>
+                    <p className="text-xs font-extrabold uppercase tracking-[0.24em] text-brand">ALFA-ADMIN</p>
+                    <p className="mt-1 text-sm font-semibold text-white/80">Validando sesión…</p>
+                </div>
             </div>
         </div>
     );
@@ -306,48 +310,54 @@ function LoginScreen({ error, onLogin }: { error: string | null; onLogin: (email
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-900">
-            <form onSubmit={submit} className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-7 shadow-2xl">
-                <div className="text-center">
-                    <img
-                        src="/login-logo.png"
-                        alt="Cloud Admin"
-                        className="mx-auto h-24 w-24 object-contain"
-                    />
-                    <p className="text-xs font-black uppercase tracking-[0.28em] text-indigo-600">CLIC-CLOUD</p>
-                    <h1 className="mt-3 text-2xl font-black text-slate-950">Acceso Cloud-Admin</h1>
-                    <p className="mt-1 text-sm text-slate-500">Inicia sesión con tu usuario autorizado.</p>
+        <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-brand-sidebar-deep px-4 py-10 text-brand-text">
+            <div className="pointer-events-none absolute inset-0 opacity-60" aria-hidden="true">
+                <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-brand/10 blur-3xl" />
+                <div className="absolute -bottom-48 -left-32 h-96 w-96 rounded-full bg-brand-accent/5 blur-3xl" />
+            </div>
+            <form onSubmit={submit} className="relative min-w-0 w-full max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-white p-6 shadow-[0_24px_80px_rgba(0,0,0,0.28)] sm:p-8">
+                <div>
+                    <img src="/alfa-admin-logo.svg" alt="ALFA-Admin — Control Center" className="h-auto w-[220px] max-w-full" />
+                    <div className="mt-7 border-t border-brand-border pt-6">
+                        <p className="text-[11px] font-extrabold uppercase tracking-[0.22em] text-brand">Acceso ALFA-Admin</p>
+                        <h1 className="mt-2 text-xl font-extrabold tracking-tight text-brand-sidebar sm:text-2xl">Centro de control de ALFA-RMS</h1>
+                        <p className="mt-2 text-sm leading-6 text-brand-text-muted">Ingresa con tu usuario administrativo autorizado.</p>
+                    </div>
                 </div>
 
                 {error || localError ? (
-                    <div className="mt-5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+                    <div className="mt-5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700" role="alert" aria-live="polite">
                         {localError || error}
                     </div>
                 ) : null}
 
                 <div className="mt-6 space-y-4">
-                    <label className="block">
-                        <span className="text-xs font-black uppercase tracking-wide text-slate-500">Email</span>
+                    <label className="block min-w-0">
+                        <span className="text-xs font-bold text-brand-text">Correo electrónico</span>
                         <input
+                            id="admin-email"
                             required
                             type="email"
+                            autoComplete="email"
                             value={email}
                             onChange={(event) => setEmail(event.target.value)}
-                            className="mt-2 w-full rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                            className="input mt-2 min-w-0 px-4 py-3"
                             placeholder="usuario@empresa.com"
                         />
                     </label>
-                    <label className="block">
-                        <span className="flex items-center justify-between gap-3 text-xs font-black uppercase tracking-wide text-slate-500">
-                            <span>Clave</span>
-                            <button type="button" onClick={() => setForgotPasswordOpen(true)} className="normal-case tracking-normal text-indigo-600 hover:text-indigo-800">¿Olvidaste tu contraseña?</button>
+                    <label className="block min-w-0">
+                        <span className="flex min-w-0 flex-wrap items-center justify-between gap-2 text-xs font-bold text-brand-text">
+                            <span>Contraseña</span>
+                            <button type="button" onClick={() => setForgotPasswordOpen(true)} className="font-semibold text-brand hover:text-brand-hover">¿Olvidaste tu contraseña?</button>
                         </span>
                         <input
+                            id="admin-password"
                             required
                             type="password"
+                            autoComplete="current-password"
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
-                            className="mt-2 w-full rounded-lg border border-slate-200 px-4 py-3 text-sm font-semibold outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                            className="input mt-2 min-w-0 px-4 py-3"
                             placeholder="Clave de acceso"
                         />
                     </label>
@@ -356,10 +366,11 @@ function LoginScreen({ error, onLogin }: { error: string | null; onLogin: (email
                 <button
                     type="submit"
                     disabled={loading}
-                    className="mt-6 w-full rounded-lg bg-indigo-600 px-4 py-3 text-sm font-black text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-4 py-3 text-sm font-extrabold text-white transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                    {loading ? 'Validando...' : 'Entrar'}
+                    {loading ? <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" />Validando…</> : 'Entrar al Control Center'}
                 </button>
+                <p className="mt-6 text-center text-[11px] font-medium text-brand-text-muted">Acceso restringido · Plataforma ALFA-RMS</p>
             </form>
             <ForgotPasswordDialog open={forgotPasswordOpen} initialEmail={email} onClose={() => setForgotPasswordOpen(false)} />
         </div>
@@ -370,7 +381,7 @@ function getAuthErrorMessage(error: unknown) {
     const message = error instanceof Error ? error.message : String(error || '');
     if (/invalid login credentials/i.test(message)) return 'Email o clave incorrectos.';
     if (/email not confirmed/i.test(message)) return 'Este email no ha sido confirmado.';
-    if (/access activo|cloud-admin/i.test(message)) return message;
+    if (/access activo|cloud-admin|alfa-admin/i.test(message)) return message;
     return message || 'No se pudo completar la autenticación.';
 }
 

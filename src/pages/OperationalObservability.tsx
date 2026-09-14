@@ -168,7 +168,7 @@ export const OperationalObservability: React.FC = () => {
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement('a');
         anchor.href = url;
-        anchor.download = `cloud-admin-observability-${period}-${Date.now()}.json`;
+        anchor.download = `alfa-admin-observability-${period}-${Date.now()}.json`;
         anchor.click();
         URL.revokeObjectURL(url);
     };
@@ -183,7 +183,7 @@ export const OperationalObservability: React.FC = () => {
                     </div>
                     <h2 className="mt-3 text-2xl font-black text-slate-900">Centro de Observabilidad Operativa</h2>
                     <p className="mt-1 max-w-3xl text-sm font-medium text-slate-500">
-                        Consumo y salud tecnica por tenant, terminal y canal. Esta consola es interna de Cloud-Admin y no se expone al cliente final.
+                        Consumo y salud técnica por tenant, terminal y canal. Esta consola es interna de ALFA-Admin y no se expone al cliente final.
                     </p>
                 </div>
 
@@ -278,7 +278,7 @@ export const OperationalObservability: React.FC = () => {
 
             {!data.telemetryConfigured ? (
                 <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
-                    {data.telemetryMessage || 'Telemetria ERP opcional no configurada. Se muestran datos locales de Cloud-Admin/Supabase.'}
+                    {data.telemetryMessage || 'Telemetría ALFA-RMS opcional no configurada. Se muestran datos locales de ALFA-Admin/Supabase.'}
                 </div>
             ) : null}
 

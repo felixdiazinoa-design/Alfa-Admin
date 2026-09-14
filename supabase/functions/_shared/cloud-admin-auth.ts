@@ -68,18 +68,18 @@ export function actorHasPermission(actor: CloudAdminActor, permission: string) {
 
 export async function requireCloudAdminActor(request: Request, permission: string): Promise<CloudAdminActor> {
     const token = (request.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '').trim();
-    if (!token) throw new Error('Unauthorized cloud admin request');
+    if (!token) throw new Error('Unauthorized administrative request');
 
     const client = createCloudAdminClient();
     const { data: authData, error: authError } = await client.auth.getUser(token);
-    if (authError || !authData.user?.id) throw new Error('Unauthorized cloud admin request');
+    if (authError || !authData.user?.id) throw new Error('Unauthorized administrative request');
 
     const { data, error } = await client
         .from('cloud_admin_users')
         .select('id, auth_user_id, email, full_name, status, cloud_admin_profiles(code, level, is_active, permissions)')
         .eq('auth_user_id', authData.user.id)
         .maybeSingle();
-    if (error || !data) throw new Error('Unauthorized cloud admin request');
+    if (error || !data) throw new Error('Unauthorized administrative request');
 
     const row = data as ActorRow;
     const profile = relation(row.cloud_admin_profiles);
@@ -93,7 +93,7 @@ export async function requireCloudAdminActor(request: Request, permission: strin
         permissions: profile?.permissions ?? {},
     };
     if (row.status !== 'active' || profile?.is_active !== true || !actorHasPermission(actor, permission)) {
-        throw new Error('Forbidden cloud admin request');
+        throw new Error('Forbidden administrative request');
     }
     return actor;
 }

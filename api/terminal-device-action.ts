@@ -857,7 +857,7 @@ async function repairDuplicateTenantDeviceRegistry(
             statusCode: 409,
             body: {
                 error: "TENANT_DEVICE_CONFLICT_NOT_REPAIRABLE",
-                message: "Cloud-Admin detecto un conflicto de device, pero no encontro el registro existente para repararlo.",
+                message: "ALFA-Admin detectó un conflicto de device, pero no encontró el registro existente para repararlo.",
             },
         };
     }
@@ -955,7 +955,7 @@ async function repairDuplicateTenantDeviceRegistry(
             requested_registry_id: registryId,
             authorized_device_id: deviceId,
             archived_duplicate_registry_ids: duplicateIds,
-            message: "Device autorizado; Cloud-Admin reparo el registro duplicado. Reintenta conexion desde el POS.",
+            message: "Device autorizado; ALFA-Admin reparó el registro duplicado. Reintenta conexión desde el POS.",
         },
     };
 }
@@ -996,7 +996,7 @@ export default async function handler(request: ApiRequest, response: ServerRespo
             });
             sendJson(response, 400, {
                 error: "DEVICE_ID_REQUIRED",
-                message: "DEVICE_ID_REQUIRED: Cloud-Admin necesita un device_id autorizado antes de llamar ERP.",
+                message: "DEVICE_ID_REQUIRED: ALFA-Admin necesita un device_id autorizado antes de llamar ALFA-RMS.",
             });
             return;
         }

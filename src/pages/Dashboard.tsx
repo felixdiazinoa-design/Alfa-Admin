@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AlertCircle, CheckCircle2, Clock, Frown, HelpCircle, Meh, Server, ShieldAlert, Smile, Users } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { tenantService, type DashboardStats } from '../lib/tenantService';
+import { chartColors } from '../theme/chartColors';
 
 const emptyStats: DashboardStats = {
     totalTenants: 0,
@@ -230,26 +231,26 @@ export const Dashboard: React.FC = () => {
                             <AreaChart data={stats.tenantGrowth} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="tenantGrowthValue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.2} />
-                                        <stop offset="95%" stopColor="#4f46e5" stopOpacity={0} />
+                                        <stop offset="5%" stopColor={chartColors.primary} stopOpacity={0.22} />
+                                        <stop offset="95%" stopColor={chartColors.primary} stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
-                                <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                <XAxis dataKey="name" stroke={chartColors.axis} fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis stroke={chartColors.axis} fontSize={12} tickLine={false} axisLine={false} allowDecimals={false} />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
                                 <Tooltip
-                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontFamily: '"Public Sans", sans-serif' }}
+                                    contentStyle={{ borderRadius: '12px', border: `1px solid ${chartColors.grid}`, boxShadow: '0 4px 14px rgb(11 22 24 / 0.08)', fontFamily: 'Sora, Inter, system-ui, sans-serif' }}
                                     formatter={(value: number | string | undefined) => [formatInteger(Number(value ?? 0)), 'Altas']}
                                 />
                                 <Area
                                     type="linear"
                                     dataKey="value"
-                                    stroke="#4f46e5"
+                                    stroke={chartColors.primary}
                                     strokeWidth={3}
                                     fillOpacity={1}
                                     fill="url(#tenantGrowthValue)"
-                                    activeDot={{ r: 6, strokeWidth: 2, stroke: '#fff' }}
-                                    dot={{ r: 4, fill: '#4f46e5', stroke: '#fff', strokeWidth: 2 }}
+                                    activeDot={{ r: 6, strokeWidth: 2, stroke: chartColors.surface }}
+                                    dot={{ r: 4, fill: chartColors.primary, stroke: chartColors.surface, strokeWidth: 2 }}
                                 />
                             </AreaChart>
                         </ResponsiveContainer>

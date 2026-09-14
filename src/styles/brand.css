@@ -1,0 +1,25 @@
+:root {
+    --brand-primary: #00a7a0;
+    --brand-primary-hover: #008c87;
+    --brand-on-primary: #061011;
+    --brand-primary-soft: #ddf6f3;
+    --brand-accent: #b8e336;
+    --brand-sidebar: #132124;
+    --brand-sidebar-deep: #0b1618;
+    --brand-background: #f4f7f6;
+    --brand-surface: #ffffff;
+    --brand-border: #dde6e4;
+    --brand-text: #172624;
+    --brand-text-muted: #60716e;
+    --brand-focus-ring: rgba(0, 167, 160, 0.3);
+}
+
+::selection {
+    background: var(--brand-primary-soft);
+    color: var(--brand-sidebar-deep);
+}
+
+:focus-visible {
+    outline: 3px solid var(--brand-focus-ring);
+    outline-offset: 2px;
+}
