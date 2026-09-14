@@ -1931,7 +1931,7 @@ export async function syncTerminalAuthorizedDevice(input: {
             success: true,
             action: "authorized_device_already_synced",
             authorized_device_id: deviceId,
-            message: "El device autorizado ya estaba persistido en Cloud-Admin.",
+            message: "El device autorizado ya estaba persistido en ALFA-Admin.",
         };
     }
 
@@ -1957,7 +1957,7 @@ export async function syncTerminalAuthorizedDevice(input: {
         authorized_device_id: deviceId,
         message: missingAuthColumns
             ? "Device sincronizado en columnas legacy (device_id/current_device_id). Aplica la migracion 202605271015_terminal_device_authorization en Supabase para persistir authorized_device_id."
-            : "Device autorizado persistido en Cloud-Admin. El POS puede reintentar conexion.",
+            : "Device autorizado persistido en ALFA-Admin. El POS puede reintentar conexión.",
     };
 }
 

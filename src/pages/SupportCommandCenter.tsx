@@ -2317,7 +2317,7 @@ const SupportCommandCenter: React.FC = () => {
                                 const isPrivateMessage = message.visibility === 'private';
                                 const isLatestMessage = messageIndex === messages.length - 1;
                                 const isExpanded = messageExpansion[message.id] ?? isLatestMessage;
-                                const senderLabel = isPrivateMessage ? 'Nota interna' : isAdminMessage ? 'Cloud Admin' : isSystemMessage ? 'Sistema' : getContactLabel(selectedTicket);
+                                const senderLabel = isPrivateMessage ? 'Nota interna' : isAdminMessage ? 'ALFA-Admin' : isSystemMessage ? 'Sistema' : getContactLabel(selectedTicket);
 
                                 return (
                                     <div
