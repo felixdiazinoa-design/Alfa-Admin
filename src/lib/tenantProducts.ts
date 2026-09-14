@@ -7,7 +7,7 @@ import type {
     TenantLifecycleStatus,
     TenantProvisioningStatus,
     TenantType,
-} from '../types';
+} from '../types.js';
 
 export type TenantProductKey = 'pos' | 'erp' | 'backup';
 

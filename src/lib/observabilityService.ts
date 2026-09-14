@@ -1,12 +1,12 @@
-import { supabase, supabaseAdmin, supabaseProjectUrl } from './supabase';
-import { invokeAdminCommand } from './adminApi';
+import { supabase, supabaseAdmin, supabaseProjectUrl } from './supabase.js';
+import { invokeAdminCommand } from './adminApi.js';
 import type {
     CloudChannel,
     ContractedProduct,
     Tenant,
     TenantTerminalErpReadiness,
     TenantTerminalRegistryEntry,
-} from '../types';
+} from '../types.js';
 
 export type ObservabilityStatus = 'OK' | 'ATTENTION' | 'CRITICAL';
 export type ObservabilityPeriod = '24h' | '7d' | '30d';
