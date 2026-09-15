@@ -2,6 +2,14 @@
 
 Centro de control y administración de la plataforma ALFA-RMS. Reúne la gestión de tenants, licencias, soporte, seguridad, observabilidad, implementaciones y distribución de versiones.
 
+## Provisioning desde ALFA-RMS
+
+El endpoint `POST /api/activation/provision-tenant` requiere autenticación
+servidor-a-servidor. Configura `CLOUD_ADMIN_PROVISION_TOKEN` en Vercel con un
+secreto aleatorio de alta entropía y usa el mismo valor como
+`CLOUD_ADMIN_API_TOKEN` únicamente en el backend de ALFA-RMS. Nunca expongas
+este valor con un prefijo `VITE_`.
+
 ## Arquitectura
 
 - React 19 + TypeScript + Vite para la interfaz.
