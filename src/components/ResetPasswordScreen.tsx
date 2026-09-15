@@ -38,11 +38,12 @@ export function ResetPasswordScreen({ onComplete, onCancel }: ResetPasswordScree
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-900">
-            <form onSubmit={submit} className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-7 shadow-2xl">
+        <div className="flex min-h-screen items-center justify-center bg-brand-sidebar-deep px-4 text-brand-text">
+            <form onSubmit={submit} className="w-full max-w-md rounded-2xl border border-brand-border bg-white p-7 shadow-2xl">
                 <div className="text-center">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-700"><KeyRound size={26} /></div>
-                    <p className="mt-4 text-xs font-black uppercase tracking-[0.28em] text-indigo-600">CLIC-CLOUD</p>
+                    <img src="/alfa-admin-mark.svg" alt="ALFA-Admin" className="mx-auto h-16 w-16" />
+                    <div className="mx-auto mt-4 flex h-11 w-11 items-center justify-center rounded-xl bg-brand-soft text-brand"><KeyRound size={22} /></div>
+                    <p className="mt-4 text-xs font-black uppercase tracking-[0.28em] text-brand">ALFA-ADMIN</p>
                     <h1 className="mt-2 text-2xl font-black text-slate-950">Restablecer contraseña</h1>
                     <p className="mt-1 text-sm text-slate-500">Define una nueva clave para recuperar el acceso.</p>
                 </div>
@@ -65,7 +66,7 @@ export function ResetPasswordScreen({ onComplete, onCancel }: ResetPasswordScree
 
                 <div className="mt-6 flex gap-3">
                     {!success ? <button type="button" onClick={() => void onCancel()} disabled={saving} className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-600 hover:bg-slate-50 disabled:opacity-50">Volver al acceso</button> : null}
-                    <button type={success ? 'button' : 'submit'} onClick={success ? () => void onComplete() : undefined} disabled={saving} className="flex-1 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-black text-white hover:bg-indigo-700 disabled:opacity-60">{success ? 'Ir al acceso' : saving ? 'Actualizando...' : 'Guardar contraseña'}</button>
+                    <button type={success ? 'button' : 'submit'} onClick={success ? () => void onComplete() : undefined} disabled={saving} className="flex-1 rounded-xl bg-brand px-4 py-3 text-sm font-black text-white hover:bg-brand-hover disabled:opacity-60">{success ? 'Ir al acceso' : saving ? 'Actualizando…' : 'Guardar contraseña'}</button>
                 </div>
             </form>
         </div>
@@ -76,7 +77,7 @@ function PasswordInput({ id, label, value, onChange, visible }: { id: string; la
     return (
         <label className="block" htmlFor={id}>
             <span className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</span>
-            <input id={id} required minLength={MIN_ACCOUNT_PASSWORD_LENGTH} type={visible ? 'text' : 'password'} autoComplete="new-password" value={value} onChange={(event) => onChange(event.target.value)} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
+            <input id={id} required minLength={MIN_ACCOUNT_PASSWORD_LENGTH} type={visible ? 'text' : 'password'} autoComplete="new-password" value={value} onChange={(event) => onChange(event.target.value)} className="input mt-2 px-4 py-3" />
         </label>
     );
 }

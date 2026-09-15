@@ -1,6 +1,6 @@
 # Aplicar autorización de terminal en Supabase (gamma / prod)
 
-Cloud-Admin y el POS esperan columnas como `authorized_device_id` en `landlord.tenant_server_registry`. Si gamma muestra:
+ALFA-Admin y el módulo POS esperan columnas como `authorized_device_id` en `landlord.tenant_server_registry`. Si gamma muestra:
 
 `column tenant_server_registry.authorized_device_id does not exist`
 
@@ -95,7 +95,7 @@ supabase functions deploy request-pos-erp-readiness \
   --no-verify-jwt
 ```
 
-## Cloud-Admin (Vercel gamma)
+## ALFA-Admin (Vercel gamma)
 
 1. Merge/despliega el PR con el fix de **Persistir device autorizado** (actualización vía `supabaseAdmin` + fallback de columnas).
 2. En **Tenants → terminales → Persistir device autorizado** → OK.
@@ -123,7 +123,7 @@ Eso actualiza `register_tenant_server_endpoint`, `resolve_tenant_license` y agre
 
 El POS debe leer `device_license_allowed` / `license_block_reason` de `resolve_tenant_license(..., p_device_id)` o `auth_status = LICENSE_EXCEEDED` en registry.
 
-## Validacion de licencia en activacion POS (Cloud Admin API)
+## Validación de licencia en activación POS (API de ALFA-Admin)
 
 Para bloquear el wizard de instalacion cuando no hay cupo, aplica tambien:
 
@@ -131,11 +131,11 @@ Para bloquear el wizard de instalacion cuando no hay cupo, aplica tambien:
 
 Eso agrega `landlord.validate_terminal_activation_license` y el fallback REST `public.check_terminal_license_availability`.
 
-Despliega Cloud Admin (Vercel gamma) con el route:
+Despliega ALFA-Admin (Vercel gamma) con la ruta:
 
 `POST /api/activation/validate-terminal-license`
 
-El APK CLIC-POS (v1.0.703+) llama ese endpoint con el JWT del login de activacion. Si responde 404/501, intenta RPC Supabase y luego ERP en modo estricto.
+El APK de ALFA-RMS POS (v1.0.703+) llama ese endpoint con el JWT del login de activación. Si responde 404/501, intenta RPC Supabase y luego ALFA-RMS en modo estricto.
 
 Para **POS_ONLY**, aplica tambien:
 

@@ -64,7 +64,7 @@ export function buildTerminalReconciliationPreview(
         resultingAuthorizedDeviceId: resultingDeviceId,
         reportedDeviceIds,
         auditPlan: [
-            'Validar que tenant ERP corresponde al tenant Cloud-Admin.',
+            'Validar que el tenant ALFA-RMS corresponde al tenant ALFA-Admin.',
             'Validar que la terminal ERP pertenece a la sucursal indicada.',
             'Registrar el vínculo explícito catálogo → terminal ERP.',
             'Conservar historiales y marcar devices anteriores como reemplazados o revocados.',

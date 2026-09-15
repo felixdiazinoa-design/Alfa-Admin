@@ -1,6 +1,6 @@
-# Contrato ERP: solicitudes de dispositivo para terminales CLIC-POS
+# Contrato ALFA-RMS: solicitudes de dispositivo para terminales POS
 
-Cloud Admin no persiste ni resuelve solicitudes localmente. El ERP es la fuente canónica porque recibe el bootstrap del POS y es el único componente que puede cambiar `public.erp_terminals.authorized_device_id`, revocar credenciales y resolver la solicitud en una transacción.
+ALFA-Admin no persiste ni resuelve solicitudes localmente. ALFA-RMS es la fuente canónica porque recibe el bootstrap del POS y es el único componente que puede cambiar `public.erp_terminals.authorized_device_id`, revocar credenciales y resolver la solicitud en una transacción.
 
 ## Persistencia
 
@@ -14,7 +14,7 @@ El ERP debe ampliar `public.terminal_auth_attempts` (o renombrarla sin romper el
 
 Debe existir una restricción idempotente para una solicitud pendiente por `(tenant_id, terminal_id, requested_device_id)`. Repetir el bootstrap del mismo dispositivo actualiza `updated_at` y los metadatos; no inserta otra fila.
 
-Compatibilidad temporal: el runtime serverless actualmente guarda estos eventos como `REJECTED` aunque no exista rechazo administrativo (`reason = DEVICE_SUPERSEDED`, `metadata.runtime = serverless`, sin `resolved_at` ni `resolved_by`). Cloud Admin interpreta únicamente el evento legacy más reciente como pendiente. El hotfix ERP debe persistirlo directamente como `PENDING` y eliminar esta ambigüedad.
+Compatibilidad temporal: el runtime serverless actualmente guarda estos eventos como `REJECTED` aunque no exista rechazo administrativo (`reason = DEVICE_SUPERSEDED`, `metadata.runtime = serverless`, sin `resolved_at` ni `resolved_by`). ALFA-Admin interpreta únicamente el evento legacy más reciente como pendiente. El hotfix de ALFA-RMS debe persistirlo directamente como `PENDING` y eliminar esta ambigüedad.
 
 ## Bootstrap POS
 
@@ -71,15 +71,15 @@ Para el dispositivo anterior debe conservarse:
 
 El botón “Reintentar” del POS solo vuelve a consultar este endpoint.
 
-## Consulta para Cloud Admin
+## Consulta para ALFA-Admin
 
 Se mantiene `GET /api/sync/terminals/{terminal_id}/auth-attempts`. Cada elemento debe incluir los campos canónicos anteriores y nunca incluir tokens. El endpoint debe verificar el tenant de la credencial de servicio y la terminal.
 
-Mientras el ERP normaliza ese contrato HTTP, el backend server-side de Cloud Admin valida la solicitud seleccionada directamente contra `public.terminal_auth_attempts`, usando el tenant ERP resuelto desde la sesión y el UUID canónico de la terminal. Esta lectura no autoriza, no resuelve solicitudes y no modifica terminales: la única mutación sigue siendo el takeover canónico del ERP. El navegador no aporta el tenant ERP ni puede acceder con la service role.
+Mientras ALFA-RMS normaliza ese contrato HTTP, el backend server-side de ALFA-Admin valida la solicitud seleccionada directamente contra `public.terminal_auth_attempts`, usando el tenant ALFA-RMS resuelto desde la sesión y el UUID canónico de la terminal. Esta lectura no autoriza, no resuelve solicitudes y no modifica terminales: la única mutación sigue siendo el takeover canónico de ALFA-RMS. El navegador no aporta el tenant ni puede acceder con la service role.
 
 ## Aprobar y reemplazar
 
-Cloud Admin usa exclusivamente `POST /api/settings/terminals/{terminal_id}/takeover` con:
+ALFA-Admin usa exclusivamente `POST /api/settings/terminals/{terminal_id}/takeover` con:
 
 ```json
 {
@@ -129,7 +129,7 @@ Respuesta obligatoria:
 
 ## Rechazar
 
-Cloud Admin llama `POST /api/sync/terminals/{terminal_id}/auth-attempts/{request_id}/reject` con `tenant_id`, `cloud_admin_tenant_id`, `requested_device_id`, `reason` y `requested_by`. La operación debe ser idempotente, bloquear la solicitud, validar tenant/terminal/dispositivo y devolver:
+ALFA-Admin llama `POST /api/sync/terminals/{terminal_id}/auth-attempts/{request_id}/reject` con `tenant_id`, `cloud_admin_tenant_id`, `requested_device_id`, `reason` y `requested_by`. La operación debe ser idempotente, bloquear la solicitud, validar tenant/terminal/dispositivo y devolver:
 
 ```json
 {
@@ -148,4 +148,4 @@ El ERP debe devolver códigos estables: `DEVICE_SUPERSEDED`, `DEVICE_NOT_AUTHORI
 
 Ninguno de estos flujos puede usar `/api/sync/terminals/register`, `/api/setup/bind-terminal` ni un JWT administrativo enviado desde el POS.
 
-El `catalog_terminal_id` puede coincidir con el `terminal_id` canónico cuando el catálogo Cloud fue reconciliado reutilizando el UUID ERP. Esa igualdad no bloquea la operación: el backend debe comprobar que el UUID existe en `erp_terminals`, que su `store_id` coincide y que la tienda pertenece al tenant ERP resuelto para el tenant de Cloud Admin.
+El `catalog_terminal_id` puede coincidir con el `terminal_id` canónico cuando el catálogo cloud fue reconciliado reutilizando el UUID de ALFA-RMS. Esa igualdad no bloquea la operación: el backend debe comprobar que el UUID existe en `erp_terminals`, que su `store_id` coincide y que la tienda pertenece al tenant ALFA-RMS resuelto para el tenant de ALFA-Admin.

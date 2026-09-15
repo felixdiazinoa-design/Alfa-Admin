@@ -1,5 +1,6 @@
 import type { IncomingHttpHeaders, IncomingMessage, ServerResponse } from "node:http";
 import { createClient } from "@supabase/supabase-js";
+import { requireCloudAdminPermission, CloudAdminAuthError } from "./lib/cloud-admin-session.js";
 
 type ApiRequest = IncomingMessage & {
     body?: unknown;
@@ -92,11 +93,6 @@ function getEnv(...names: string[]) {
     throw new Error(`Missing required environment variable: ${names.join(" or ")}`);
 }
 
-function getHeader(headers: IncomingHttpHeaders, name: string) {
-    const value = headers[name.toLowerCase()];
-    return Array.isArray(value) ? value[0] : value;
-}
-
 async function readBody(request: ApiRequest) {
     if (request.body) {
         return typeof request.body === "string" ? JSON.parse(request.body) : request.body;
@@ -121,22 +117,6 @@ function objectValue(value: unknown): Record<string, unknown> {
 
 function normalizedText(value: unknown) {
     return typeof value === "string" ? value.trim().toUpperCase() : "";
-}
-
-function isAuthorizedTakeoverRequest(request: ApiRequest) {
-    const expectedToken = process.env.CONFIG_ADMIN_TOKEN;
-    const receivedToken = getHeader(request.headers, "x-config-admin-token");
-
-    if (expectedToken && receivedToken === expectedToken) {
-        return true;
-    }
-
-    const authorization = getHeader(request.headers, "authorization") ?? "";
-    const bearerToken = authorization.replace(/^Bearer\s+/i, "").trim();
-    if (!bearerToken) return false;
-
-    const serviceRoleKey = getEnv("SUPABASE_SERVICE_ROLE_KEY", "VITE_SUPABASE_SERVICE_ROLE_KEY");
-    return bearerToken === serviceRoleKey;
 }
 
 function sanitizePayload(value: unknown): unknown {
@@ -392,10 +372,7 @@ export default async function handler(request: ApiRequest, response: ServerRespo
     }
 
     try {
-        if (!isAuthorizedTakeoverRequest(request)) {
-            sendJson(response, 401, { error: "UNAUTHORIZED", message: "Solicitud de recuperacion no autorizada." });
-            return;
-        }
+        const session = await requireCloudAdminPermission(request.headers, "terminal_reauthorization");
 
         const body = await readBody(request) as TakeoverPayload;
         const tenantId = stringValue(body.tenant_id);
@@ -405,8 +382,8 @@ export default async function handler(request: ApiRequest, response: ServerRespo
         const deviceName = stringValue(body.device_name);
         const reason = stringValue(body.reason);
         const helpdeskTicketId = stringValue(body.helpdesk_ticket_id);
-        const actorUserId = getHeader(request.headers, "x-actor-user-id") || null;
-        const actorEmail = getHeader(request.headers, "x-actor-email") || getHeader(request.headers, "x-actor-source") || "cloud-admin";
+        const actorUserId = session.actor.authUserId;
+        const actorEmail = session.actor.email;
 
         if (!tenantId || !terminalId || !newDeviceId || !reason) {
             sendJson(response, 400, {
@@ -425,8 +402,8 @@ export default async function handler(request: ApiRequest, response: ServerRespo
         }
 
         const supabase = createClient(
-            getEnv("SUPABASE_URL", "VITE_SUPABASE_URL"),
-            getEnv("SUPABASE_SERVICE_ROLE_KEY", "VITE_SUPABASE_SERVICE_ROLE_KEY"),
+            getEnv("SUPABASE_URL"),
+            getEnv("SUPABASE_SERVICE_ROLE_KEY"),
             {
                 auth: { autoRefreshToken: false, persistSession: false },
                 db: { schema: "landlord" },
@@ -503,7 +480,7 @@ export default async function handler(request: ApiRequest, response: ServerRespo
         if (!erpTenant) {
             sendJson(response, 404, {
                 error: "ERP_TENANT_NOT_FOUND",
-                message: "Tenant no encontrado en ERP para este tenant de Cloud-Admin.",
+                message: "Tenant no encontrado en ALFA-RMS para este tenant de ALFA-Admin.",
             });
             return;
         }
@@ -677,6 +654,10 @@ export default async function handler(request: ApiRequest, response: ServerRespo
             message: "Terminal reasignada correctamente. La tablet anterior fue revocada. Inicia sesion/autentica la nueva tablet para continuar.",
         });
     } catch (error) {
+        if (error instanceof CloudAdminAuthError) {
+            sendJson(response, error.status, { error: error.code, message: error.message });
+            return;
+        }
         console.error("terminal-takeover failed", error);
         sendJson(response, error instanceof SyntaxError ? 400 : 500, {
             error: error instanceof SyntaxError ? "INVALID_JSON" : "INTERNAL_ERROR",

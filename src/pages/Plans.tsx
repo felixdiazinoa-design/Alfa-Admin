@@ -14,7 +14,7 @@ export const Plans: React.FC = () => {
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2">
-                        <Package className="text-blue-500" size={28} />
+                        <Package className="text-brand" size={28} />
                         Planes SaaS (Licencias)
                     </h2>
                     <p className="text-slate-500 text-sm mt-1">Configura los paquetes de suscripción y sus límites estructurales para los tenants.</p>
@@ -27,9 +27,9 @@ export const Plans: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
                 {mockPlans.map((plan, i) => (
-                    <div key={plan.id} className={`relative bg-white rounded-3xl overflow-hidden border ${i === 1 ? 'border-blue-400 shadow-xl shadow-blue-100/50' : 'border-slate-200 shadow-sm'}`}>
+                    <div key={plan.id} className={`relative overflow-hidden rounded-3xl border bg-white ${i === 1 ? 'border-brand shadow-xl shadow-brand-soft/60' : 'border-brand-border shadow-sm'}`}>
                         {i === 1 && (
-                            <div className="bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest text-center py-1.5 flex items-center justify-center gap-1">
+                            <div className="flex items-center justify-center gap-1 bg-brand py-1.5 text-center text-[10px] font-black uppercase tracking-widest text-white">
                                 <Star size={12} fill="white" /> Más Popular
                             </div>
                         )}
@@ -68,7 +68,7 @@ export const Plans: React.FC = () => {
                             </div>
 
                             <div className="mt-8 pt-6 border-t border-slate-100">
-                                <button className={`w-full py-3 rounded-xl font-bold transition-colors ${i === 1 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
+                                <button className={`w-full rounded-xl py-3 font-bold transition-colors ${i === 1 ? 'bg-brand text-white hover:bg-brand-hover' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}>
                                     Editar Paquete
                                 </button>
                             </div>

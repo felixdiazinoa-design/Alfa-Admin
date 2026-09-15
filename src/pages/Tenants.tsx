@@ -1224,7 +1224,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
             + `Nuevo dispositivo: ${requestedDeviceId}\n\n`
             + 'El dispositivo anterior será bloqueado y todas sus credenciales/tokens serán revocados. '
             + (requiresErpConfirmation
-                ? 'El ERP debe confirmar explícitamente el takeover y la rotación; de lo contrario Cloud Admin no mostrará éxito. '
+                ? 'ALFA-RMS debe confirmar explícitamente el takeover y la rotación; de lo contrario ALFA-Admin no mostrará éxito. '
                 : '')
             + '\n\n¿Confirmas esta reautorización?',
         );
@@ -1378,7 +1378,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
         }
 
         const confirmed = confirm(
-            `Se persistira ${deviceId} como device autorizado en Cloud-Admin para ${terminal.name}. `
+            `Se persistirá ${deviceId} como device autorizado en ALFA-Admin para ${terminal.name}. `
             + 'El POS puede reintentar conexion sin rotar credenciales. ¿Deseas continuar?',
         );
         if (!confirmed) return;
@@ -1397,7 +1397,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                 action: 'SYNC_AUTHORIZED_DEVICE',
                 reason: 'REGISTRY_DEVICE_SYNC',
             });
-            alert(result.message || 'Device autorizado sincronizado en Cloud-Admin.');
+            alert(result.message || 'Device autorizado sincronizado en ALFA-Admin.');
             await refreshTerminalModalData();
         } catch (err: unknown) {
             console.error('Error syncing authorized device:', err);
@@ -1609,7 +1609,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
 
         if (!isCloudRecoverableLocalPosTenant(selectedTenantForTerminals)) {
             alert(isExplicitOfflinePosTenant(selectedTenantForTerminals)
-                ? 'Este POS esta en modo offline/sin Cloud Staging. No tiene recuperacion cloud desde Cloud-Admin.'
+                ? 'Este POS está en modo offline/sin Cloud Staging. No tiene recuperación cloud desde ALFA-Admin.'
                 : 'La recuperacion de terminal solo aplica a POS configurado como local. POS + ERP mantiene el flujo actual.');
             return;
         }
@@ -1670,7 +1670,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
 
         if (!isCloudRecoverableLocalPosTenant(selectedTenantForTerminals)) {
             alert(isExplicitOfflinePosTenant(selectedTenantForTerminals)
-                ? 'Este POS esta en modo offline/sin Cloud Staging. No tiene reconstruccion cloud desde Cloud-Admin.'
+                ? 'Este POS está en modo offline/sin Cloud Staging. No tiene reconstrucción cloud desde ALFA-Admin.'
                 : 'La reconstruccion local solo aplica a POS configurado como local. POS + ERP mantiene el flujo actual.');
             return;
         }
@@ -2946,7 +2946,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                 <p className="text-xs font-bold uppercase tracking-wider">Identidad y autorizacion</p>
                                                                 <p className="mt-1 text-sm font-bold">{getAuthStatusLabel(effectiveAuthStatus)}</p>
                                                                 <p className="mt-1 text-xs opacity-80">
-                                                                    Cloud-Admin muestra autorizacion, heartbeat del POS y device actual reportado por ERP por separado.
+                                                                    ALFA-Admin muestra autorización, heartbeat del POS y device actual reportado por ALFA-RMS por separado.
                                                                 </p>
                                                             </div>
                                                             {(isAdvancedOpen || hasActionableAuthIssue || posOnlyProvisioningBlocked || needsAuthorizedDeviceSync || detectedAuthorizationDeviceId || !hasOnlineRegistry) ? (
@@ -3868,7 +3868,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                 isExplicitOfflinePosTenant(selectedTenantForTerminals) ? 'text-slate-600' : 'text-amber-800'
                                                             }`}>
                                                                 {isExplicitOfflinePosTenant(selectedTenantForTerminals)
-                                                                    ? 'Modo offline explicito: la recuperacion cloud no esta disponible desde Cloud-Admin.'
+                                                                    ? 'Modo offline explícito: la recuperación cloud no está disponible desde ALFA-Admin.'
                                                                     : 'Elige reemplazo de hardware o reconstruccion de BD local sin cambiar el dispositivo.'}
                                                             </p>
                                                         </div>
@@ -4218,7 +4218,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                 <p className="mt-1 text-xs text-slate-500">
                                                     {editingTenantHasActiveErp
                                                         ? 'Administra RRHH, Nómina, Contabilidad e integraciones adicionales.'
-                                                        : 'Activa CLIC ERP y guarda el tenant para habilitar módulos adicionales.'}
+                                                        : 'Activa ALFA-RMS y guarda el tenant para habilitar módulos adicionales.'}
                                                 </p>
                                             </div>
                                         </div>

@@ -7,9 +7,9 @@ import type {
     TenantLifecycleStatus,
     TenantProvisioningStatus,
     TenantType,
-} from "../types";
-import { deriveTenantSemanticsFromTenant, type TenantSemanticConfig } from "./tenantProducts";
-import { buildTenantAuthMetadataPayload } from "./tenantAuthMetadata";
+} from "../types.js";
+import { deriveTenantSemanticsFromTenant, type TenantSemanticConfig } from "./tenantProducts.js";
+import { buildTenantAuthMetadataPayload } from "./tenantAuthMetadata.js";
 
 type QueryResponse<T> = Promise<{ data: T | null; error: unknown | null }>;
 type MutationResponse = Promise<{ error: unknown | null }>;

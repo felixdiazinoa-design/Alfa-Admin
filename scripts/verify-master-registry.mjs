@@ -49,11 +49,11 @@ const parseArgs = () => {
 const env = loadRuntimeEnv();
 const args = parseArgs();
 
-const supabaseUrl = env.VITE_SUPABASE_URL;
-const serviceRoleKey = env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+const supabaseUrl = env.SUPABASE_URL || env.VITE_SUPABASE_URL;
+const serviceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error("Missing VITE_SUPABASE_URL or VITE_SUPABASE_SERVICE_ROLE_KEY.");
+    throw new Error("Missing SUPABASE_URL/VITE_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.");
 }
 
 const client = createClient(supabaseUrl, serviceRoleKey, {

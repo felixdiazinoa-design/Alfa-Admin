@@ -244,7 +244,7 @@ Deno.serve(async (request) => {
         if (isExplicitOfflinePosTenant(tenant)) {
             return json({
                 error: 'POS_OFFLINE_NO_CLOUD_RECOVERY',
-                message: 'Este tenant POS_ONLY esta en modo offline/sin Cloud Staging. No tiene recuperacion cloud desde Cloud-Admin.',
+                message: 'Este tenant POS_ONLY está en modo offline/sin Cloud Staging. No tiene recuperación cloud desde ALFA-Admin.',
             }, 400);
         }
 

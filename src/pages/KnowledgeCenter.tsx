@@ -14,7 +14,7 @@ const productLabels: Record<KnowledgeProduct, string> = {
     msmall: 'MSmall',
     clicpos: 'ClicPOS',
     erp: 'ERP',
-    'cloud-admin': 'Cloud-Admin',
+    'cloud-admin': 'ALFA-Admin',
 };
 
 const typeLabels: Record<KnowledgeResourceType, string> = {
@@ -121,7 +121,7 @@ export const KnowledgeCenter: React.FC = () => {
                 <div className="mt-2 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
                     <div>
                         <h1 className="text-2xl font-black text-slate-900">Manuales y videos</h1>
-                        <p className="mt-1 text-sm text-slate-500">Documentación centralizada de MSmall, ClicPOS, ERP y Cloud-Admin.</p>
+                        <p className="mt-1 text-sm text-slate-500">Documentación centralizada de MSmall, ALFA-RMS POS, ALFA-RMS y ALFA-Admin.</p>
                     </div>
                     <div className="flex gap-2">
                         <Metric label="Recursos" value={resources.length} />

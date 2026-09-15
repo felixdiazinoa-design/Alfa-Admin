@@ -42,7 +42,8 @@ for (const source of [attemptsProxy, edgeAttempts]) {
 }
 
 assert.match(sessionGuard, /admin\.auth\.getUser\(accessToken\)/);
-assert.match(sessionGuard, /profile\.permissions\?\.\[permission\] !== true/);
+assert.match(sessionGuard, /const explicitPermission = session\.actor\.permissions\[permission\]/);
+assert.match(sessionGuard, /if \(!allowed\)/);
 assert.match(actionProxy, /requireCloudAdminPermission\(request\.headers, "terminal_reauthorization"\)/);
 assert.match(attemptsProxy, /requireCloudAdminPermission\(request\.headers, "terminal_reauthorization"\)/);
 assert.doesNotMatch(`${attemptsProxy}\n${actionProxy}`, /bearerToken === serviceRoleKey/);

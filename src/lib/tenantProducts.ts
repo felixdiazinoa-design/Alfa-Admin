@@ -7,7 +7,7 @@ import type {
     TenantLifecycleStatus,
     TenantProvisioningStatus,
     TenantType,
-} from '../types';
+} from '../types.js';
 
 export type TenantProductKey = 'pos' | 'erp' | 'backup';
 
@@ -47,12 +47,12 @@ export interface TenantProductDefinition {
 export const TENANT_PRODUCTS: TenantProductDefinition[] = [
     {
         key: 'pos',
-        label: 'CLIC POS',
+        label: 'ALFA-RMS POS',
         description: 'Terminales, licenciamiento de cajas y operacion local.'
     },
     {
         key: 'erp',
-        label: 'CLIC ERP',
+        label: 'ALFA-RMS',
         description: 'Backoffice web, reportes y administracion central.'
     },
     {
@@ -190,7 +190,7 @@ export function deriveTenantConfigFromProducts(products: TenantProductSelection)
         };
     }
 
-    throw new Error('Activa al menos un producto principal: CLIC POS o CLIC ERP.');
+    throw new Error('Activa al menos un producto principal: ALFA-RMS POS o ALFA-RMS.');
 }
 
 export function deriveTenantSemanticsFromProducts(
@@ -280,7 +280,7 @@ export function deriveTenantSemanticsFromProducts(
         };
     }
 
-    throw new Error('Activa al menos CLIC POS o CLIC ERP.');
+    throw new Error('Activa al menos ALFA-RMS POS o ALFA-RMS.');
 }
 
 export function deriveTenantSemanticsFromTenant(
@@ -301,9 +301,9 @@ export function deriveTenantSemanticsFromTenant(
 }
 
 export function getTenantTypeLabel(type: TenantType | undefined): string {
-    if (type === 'pos_only') return 'CLIC POS';
-    if (type === 'erp_only') return 'CLIC ERP';
-    return 'CLIC POS + CLIC ERP';
+    if (type === 'pos_only') return 'ALFA-RMS POS';
+    if (type === 'erp_only') return 'ALFA-RMS';
+    return 'ALFA-RMS POS + ALFA-RMS';
 }
 
 export function getActiveProductLabels(products: TenantProductSelection): string[] {

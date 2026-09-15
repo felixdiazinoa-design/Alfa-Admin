@@ -123,7 +123,7 @@ function createFeedbackToken() {
 }
 
 function formatFromAddress(name: string, email: string) {
-    const cleanName = name.trim() || 'Cloud Admin Soporte';
+    const cleanName = name.trim() || 'ALFA-Admin Soporte';
     return `${cleanName} <${email.trim().toLowerCase()}>`;
 }
 
@@ -387,7 +387,7 @@ Deno.serve(async (request) => {
             if (resendApiKey) {
                 const settingsRow = (settings ?? {}) as IntegrationSettingsRow;
                 const fromAddress = settingsRow.resend_from_email
-                    ? formatFromAddress(settingsRow.resend_from_name ?? 'Cloud Admin Soporte', settingsRow.resend_from_email)
+                    ? formatFromAddress(settingsRow.resend_from_name === 'Cloud Admin Soporte' ? 'ALFA-Admin Soporte' : settingsRow.resend_from_name ?? 'ALFA-Admin Soporte', settingsRow.resend_from_email)
                     : getEnv('HELPDESK_FROM_EMAIL');
                 const replyToAddress = settingsRow.resend_inbound_email ?? getEnv('HELPDESK_INBOUND_EMAIL');
                 const emailBody = buildFeedbackEmail(supportTicket, token);

@@ -49,7 +49,7 @@ export function ForgotPasswordDialog({ open, initialEmail = '', onClose }: Forgo
             <button type="button" className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" onClick={close} aria-label="Cerrar recuperación de contraseña" />
             <form onSubmit={submit} className="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
                 <div className="flex items-start gap-3">
-                    <div className="rounded-xl bg-indigo-100 p-3 text-indigo-700"><Mail size={21} /></div>
+                    <div className="rounded-xl bg-brand-soft p-3 text-brand"><Mail size={21} /></div>
                     <div className="min-w-0 flex-1">
                         <h2 id="forgot-password-title" className="text-xl font-black text-slate-900">Recuperar contraseña</h2>
                         <p className="mt-1 text-sm leading-relaxed text-slate-500">Te enviaremos un enlace seguro para establecer una nueva contraseña.</p>
@@ -65,7 +65,7 @@ export function ForgotPasswordDialog({ open, initialEmail = '', onClose }: Forgo
                 ) : (
                     <label className="mt-6 block" htmlFor="recovery-email">
                         <span className="text-xs font-black uppercase tracking-wide text-slate-500">Correo electrónico</span>
-                        <input id="recovery-email" required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} disabled={sending} className="mt-2 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 disabled:bg-slate-50" placeholder="usuario@empresa.com" />
+                        <input id="recovery-email" required type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} disabled={sending} className="input mt-2 px-4 py-3" placeholder="usuario@empresa.com" />
                     </label>
                 )}
 
@@ -73,7 +73,7 @@ export function ForgotPasswordDialog({ open, initialEmail = '', onClose }: Forgo
 
                 <div className="mt-6 flex justify-end gap-3">
                     <button type="button" onClick={close} disabled={sending} className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-black text-slate-600 hover:bg-slate-50 disabled:opacity-50">{sent ? 'Cerrar' : 'Cancelar'}</button>
-                    {!sent ? <button type="submit" disabled={sending} className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-black text-white hover:bg-indigo-700 disabled:opacity-60">{sending ? 'Enviando...' : 'Enviar enlace'}</button> : null}
+                    {!sent ? <button type="submit" disabled={sending} className="rounded-xl bg-brand px-4 py-2.5 text-sm font-black text-white hover:bg-brand-hover disabled:opacity-60">{sending ? 'Enviando…' : 'Enviar enlace'}</button> : null}
                 </div>
             </form>
         </div>
