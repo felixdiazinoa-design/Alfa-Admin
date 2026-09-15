@@ -93,7 +93,7 @@ export function ChangePasswordDialog({ open, onClose }: ChangePasswordDialogProp
             <button type="button" className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={close} aria-label="Cerrar cambio de contraseña" />
             <form onSubmit={submit} className="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
                 <div className="flex items-start gap-4">
-                    <div className="rounded-xl bg-indigo-100 p-3 text-indigo-700"><KeyRound size={22} /></div>
+                    <div className="rounded-xl bg-brand-soft p-3 text-brand"><KeyRound size={22} /></div>
                     <div className="min-w-0 flex-1">
                         <h2 id="change-password-title" className="text-xl font-black text-slate-900">Cambiar contraseña</h2>
                         <p className="mt-1 text-sm leading-relaxed text-slate-500">Confirma tu contraseña actual y elige una nueva clave de acceso.</p>
@@ -123,7 +123,7 @@ export function ChangePasswordDialog({ open, onClose }: ChangePasswordDialogProp
                                             onChange={(event) => passwordField.onChange(event.target.value)}
                                             autoComplete={passwordField.autoComplete}
                                             disabled={saving}
-                                            className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-12 text-sm font-semibold outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 disabled:bg-slate-50"
+                                            className="input px-4 py-3 pr-12"
                                         />
                                         <button
                                             type="button"
@@ -150,8 +150,8 @@ export function ChangePasswordDialog({ open, onClose }: ChangePasswordDialogProp
                         {success ? 'Cerrar' : 'Cancelar'}
                     </button>
                     {!success ? (
-                        <button type="submit" disabled={saving} className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-black text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60">
-                            {saving ? 'Actualizando...' : 'Actualizar contraseña'}
+                        <button type="submit" disabled={saving} className="rounded-xl bg-brand px-4 py-2.5 text-sm font-black text-white hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60">
+                            {saving ? 'Actualizando…' : 'Actualizar contraseña'}
                         </button>
                     ) : null}
                 </div>
@@ -159,4 +159,3 @@ export function ChangePasswordDialog({ open, onClose }: ChangePasswordDialogProp
         </div>
     );
 }
-

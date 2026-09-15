@@ -7,7 +7,7 @@ import {
     type InternalRequestStatus, type InternalRequestType, type InternalRequestUser, type InternalWorkRequest,
 } from '../lib/internalRequestService';
 
-const productLabels: Record<InternalRequestProduct, string> = { msmall: 'MSmall', clicpos: 'ClicPOS', erp: 'ERP', 'cloud-admin': 'Cloud-Admin', general: 'General' };
+const productLabels: Record<InternalRequestProduct, string> = { msmall: 'MSmall', clicpos: 'ALFA-RMS POS', erp: 'ALFA-RMS', 'cloud-admin': 'ALFA-Admin', general: 'General' };
 const statusLabels: Record<InternalRequestStatus, string> = { new: 'Nueva', under_review: 'Por verificar', approved: 'Aceptada', in_progress: 'En progreso', completed: 'Completada', rejected: 'Rechazada' };
 const statusStyles: Record<InternalRequestStatus, string> = {
     new: 'border-blue-200 bg-blue-50 text-blue-700', under_review: 'border-amber-200 bg-amber-50 text-amber-700',

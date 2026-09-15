@@ -307,7 +307,7 @@ export async function createCloudAdminUser(input: CreateCloudAdminUserInput): Pr
 
     if (existingCloudAdminError) throw existingCloudAdminError;
     if (existingCloudAdminUser) {
-        throw new Error('Este usuario ya tiene acceso registrado en Cloud-Admin.');
+        throw new Error('Este usuario ya tiene acceso registrado en ALFA-Admin.');
     }
 
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({

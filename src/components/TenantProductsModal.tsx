@@ -79,7 +79,7 @@ export const TenantProductsModal: React.FC<TenantProductsModalProps> = ({
                 </div>
 
                 <div className="p-6 space-y-5">
-                    <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+                    <div className="rounded-2xl border border-brand/20 bg-brand-soft px-4 py-3 text-sm text-brand-sidebar">
                         Usa este modal para encender o apagar productos del tenant sin mezclarlo con los datos de la empresa.
                     </div>
 
@@ -93,7 +93,7 @@ export const TenantProductsModal: React.FC<TenantProductsModalProps> = ({
                                     key={product.key}
                                     className={`rounded-2xl border flex flex-col overflow-hidden transition-all ${
                                         active
-                                            ? 'border-blue-300 bg-blue-50 shadow-sm shadow-blue-100'
+                                            ? 'border-brand/40 bg-brand-soft shadow-sm shadow-brand-soft'
                                             : 'border-slate-200 bg-white hover:border-slate-300'
                                     }`}
                                 >
@@ -104,12 +104,12 @@ export const TenantProductsModal: React.FC<TenantProductsModalProps> = ({
                                     >
                                         <div className="flex items-start justify-between gap-3">
                                             <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${
-                                                active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'
+                                                active ? 'bg-brand text-white' : 'bg-slate-100 text-slate-500'
                                             }`}>
                                                 <Icon size={20} />
                                             </div>
                                             <div className={`w-6 h-6 rounded-full border flex items-center justify-center ${
-                                                active ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300 bg-white text-transparent'
+                                                active ? 'border-brand bg-brand text-white' : 'border-slate-300 bg-white text-transparent'
                                             }`}>
                                                 <Check size={14} />
                                             </div>
@@ -119,8 +119,8 @@ export const TenantProductsModal: React.FC<TenantProductsModalProps> = ({
                                     </button>
 
                                     {active && product.key === 'pos' && (
-                                        <div className="px-4 pb-4 pt-3 border-t border-blue-100 bg-blue-50/50 mt-auto">
-                                            <label className="block text-xs font-bold text-blue-800 mb-1.5 uppercase tracking-wide">
+                                        <div className="mt-auto border-t border-brand/20 bg-brand-soft/50 px-4 pb-4 pt-3">
+                                            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-brand-sidebar">
                                                 Límite de Terminales
                                             </label>
                                             <input
@@ -128,14 +128,14 @@ export const TenantProductsModal: React.FC<TenantProductsModalProps> = ({
                                                 min="1"
                                                 value={draft.pos_licenses}
                                                 onChange={e => setDraft(d => ({ ...d, pos_licenses: parseInt(e.target.value) || 1 }))}
-                                                className="w-full px-3 py-2 bg-white border border-blue-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm text-blue-900 font-bold"
+                                                className="input bg-white px-3 py-2 font-bold"
                                             />
                                         </div>
                                     )}
 
                                     {active && product.key === 'erp' && (
-                                        <div className="px-4 pb-4 pt-3 border-t border-blue-100 bg-blue-50/50 mt-auto">
-                                            <label className="block text-xs font-bold text-blue-800 mb-1.5 uppercase tracking-wide">
+                                        <div className="mt-auto border-t border-brand/20 bg-brand-soft/50 px-4 pb-4 pt-3">
+                                            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-brand-sidebar">
                                                 Usuarios Concurrentes
                                             </label>
                                             <input
@@ -143,7 +143,7 @@ export const TenantProductsModal: React.FC<TenantProductsModalProps> = ({
                                                 min="1"
                                                 value={draft.erp_users}
                                                 onChange={e => setDraft(d => ({ ...d, erp_users: parseInt(e.target.value) || 1 }))}
-                                                className="w-full px-3 py-2 bg-white border border-blue-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm text-blue-900 font-bold"
+                                                className="input bg-white px-3 py-2 font-bold"
                                             />
                                         </div>
                                     )}
@@ -212,7 +212,7 @@ export const TenantProductsModal: React.FC<TenantProductsModalProps> = ({
 
                     {!hasMainProduct && (
                         <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-                            Debes activar al menos uno de los productos principales: CLIC POS o CLIC ERP.
+                            Debes activar al menos uno de los productos principales: ALFA-RMS POS o ALFA-RMS.
                         </div>
                     )}
 
@@ -228,7 +228,7 @@ export const TenantProductsModal: React.FC<TenantProductsModalProps> = ({
                             type="button"
                             disabled={!hasMainProduct}
                             onClick={() => onSave(normalizedDraft)}
-                            className="flex-1 px-4 py-3 text-white bg-blue-600 hover:bg-blue-700 rounded-xl font-bold shadow-sm transition-colors disabled:opacity-60"
+                            className="flex-1 rounded-xl bg-brand px-4 py-3 font-bold text-white shadow-sm transition-colors hover:bg-brand-hover disabled:opacity-60"
                         >
                             Aplicar Productos
                         </button>

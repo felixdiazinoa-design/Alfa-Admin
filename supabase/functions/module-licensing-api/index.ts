@@ -121,7 +121,7 @@ Deno.serve(async (request) => {
             const selections = normalizeSelections(payload.entitlements);
             const before = await loadOverview(client, tenantId);
             if (!before.tenant.erp_enabled && selections.some((selection) => selection.enabled)) {
-                throw new Error('Activa CLIC ERP y guarda el tenant antes de habilitar módulos adicionales.');
+                throw new Error('Activa ALFA-RMS y guarda el tenant antes de habilitar módulos adicionales.');
             }
 
             const { error } = await client.rpc('apply_tenant_erp_module_entitlements', {
@@ -142,7 +142,7 @@ Deno.serve(async (request) => {
         const message = rawMessage.includes('ERP_MODULE_DEPENDENCY_REQUIRED')
             ? 'La selección no incluye todos los módulos requeridos.'
             : rawMessage.includes('ERP_REQUIRED_FOR_MODULES')
-                ? 'CLIC ERP debe estar activo antes de habilitar módulos.'
+                ? 'ALFA-RMS debe estar activo antes de habilitar módulos.'
                 : rawMessage;
         return json(
             { error: message },

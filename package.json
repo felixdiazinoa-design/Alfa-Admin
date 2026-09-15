@@ -1,5 +1,5 @@
 {
-  "name": "cloud-admin",
+  "name": "alfa-admin",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -46,6 +46,7 @@
     "test:knowledge-center": "node scripts/test-knowledge-center.mjs",
     "test:calendar-meetings": "node scripts/test-calendar-meetings.mjs",
     "test:erp-module-licensing": "node --experimental-strip-types scripts/test-erp-module-licensing.mjs",
+    "test:vercel-esm-runtime": "node scripts/test-vercel-esm-runtime.mjs",
     "check:supabase-keys": "node scripts/check-supabase-keys.mjs",
     "verify:supabase-security": "node scripts/verify-supabase-security.mjs"
   },

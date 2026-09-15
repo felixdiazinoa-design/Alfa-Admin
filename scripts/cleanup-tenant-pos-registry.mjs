@@ -191,8 +191,8 @@ async function unblockTenantIfNeeded(supabase, tenantId, tenant) {
 async function main() {
     const { tenantId, dryRun, purge, includeAudit } = parseArgs(process.argv);
     const supabase = createClient(
-        getEnv('VITE_SUPABASE_URL'),
-        getEnv('VITE_SUPABASE_SERVICE_ROLE_KEY'),
+        process.env.SUPABASE_URL || getEnv('VITE_SUPABASE_URL'),
+        getEnv('SUPABASE_SERVICE_ROLE_KEY'),
         {
             auth: { autoRefreshToken: false, persistSession: false },
             db: { schema: 'landlord' },

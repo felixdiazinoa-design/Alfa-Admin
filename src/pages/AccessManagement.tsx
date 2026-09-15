@@ -221,7 +221,7 @@ export const AccessManagement: React.FC = () => {
                 if (result.authLinkType === 'linked_existing') {
                     setUserNotice({
                         title: 'Usuario vinculado',
-                        message: 'El email ya existía en Auth; se vinculó al perfil Cloud-Admin sin cambiar su clave actual.',
+                        message: 'El email ya existía en Auth; se vinculó al perfil ALFA-Admin sin cambiar su clave actual.',
                     });
                 } else {
                     setUserNotice({
@@ -302,7 +302,7 @@ export const AccessManagement: React.FC = () => {
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <p className="text-xs font-bold uppercase tracking-[0.24em] text-indigo-600">Seguridad</p>
-                        <h2 className="mt-2 text-2xl font-black text-slate-900">Usuarios y perfiles Cloud-Admin</h2>
+                        <h2 className="mt-2 text-2xl font-black text-slate-900">Usuarios y perfiles ALFA-Admin</h2>
                         <p className="mt-1 text-sm text-slate-500">Gestiona accesos internos, roles operativos y permisos por módulo.</p>
                     </div>
                     <button
@@ -389,7 +389,7 @@ export const AccessManagement: React.FC = () => {
                         <form onSubmit={saveUser} className="space-y-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                             <div>
                                 <p className="text-sm font-black text-slate-900">{editingUser ? 'Editar usuario' : 'Nuevo usuario'}</p>
-                                <p className="mt-1 text-xs text-slate-500">Vincula usuarios Auth con un perfil de Cloud-Admin.</p>
+                                <p className="mt-1 text-xs text-slate-500">Vincula usuarios Auth con un perfil de ALFA-Admin.</p>
                             </div>
                             <Field label="Nombre">
                                 <input required value={userForm.fullName} onChange={(event) => setUserForm({ ...userForm, fullName: event.target.value })} className="input" placeholder="Nombre del usuario" />

@@ -25,6 +25,6 @@ El resumen con IA reutiliza primero la configuración cifrada de OpenAI disponib
 
 1. Crear una reunión de prueba con una cuenta interna y una externa.
 2. Confirmar que ambas reciben la invitación.
-3. Abrir el enlace del evento desde Cloud-Admin.
+3. Abrir el enlace del evento desde ALFA-Admin.
 4. Verificar que el evento incluye el resumen, el contexto y ambos recordatorios.
 5. Si falla, revisar el mensaje conservado en la tarjeta y usar **Reintentar** después de corregir las credenciales.
