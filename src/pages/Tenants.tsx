@@ -1790,7 +1790,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
         }
     };
 
-    const renderProductSummary = (products: TenantProductSelection) => {
+    const renderProductSummary = (products: TenantProductSelection, compact = false) => {
         const normalizedProducts = normalizeTenantProductSelection(products);
         const labels = getActiveProductLabels(normalizedProducts);
         const semantics = deriveTenantSemanticsFromProducts(normalizedProducts);
@@ -1803,31 +1803,31 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
         }
 
         return (
-            <div className="space-y-3">
-                <div className="flex flex-wrap gap-2">
+            <div className={compact ? 'space-y-2' : 'space-y-3'}>
+                <div className={compact ? 'flex flex-wrap gap-1.5' : 'flex flex-wrap gap-2'}>
                     {labels.map((label) => (
-                        <span key={label} className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-black uppercase tracking-wide border border-blue-100">
+                        <span key={label} className={`${compact ? 'px-2 py-0.5 text-[11px]' : 'px-3 py-1 text-xs'} rounded-full bg-blue-50 text-blue-700 font-black uppercase tracking-wide border border-blue-100`}>
                             {label}
                         </span>
                     ))}
                 </div>
-                <p className="text-xs text-slate-500">
+                <p className={compact ? 'text-[11px] text-slate-500' : 'text-xs text-slate-500'}>
                     Solucion base: <span className="font-bold text-slate-700">{solutionLabel}</span>
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                    <span className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-600">
+                <div className={`${compact ? 'grid-cols-2 lg:grid-cols-3 gap-1.5 text-[11px]' : 'grid-cols-1 sm:grid-cols-2 gap-2 text-xs'} grid`}>
+                    <span className={`${compact ? 'px-2 py-1.5' : 'px-3 py-2'} rounded-lg border border-slate-200 bg-white text-slate-600`}>
                         Contrato: <span className="font-black text-slate-800">{semantics.contractedProduct}</span>
                     </span>
-                    <span className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-600">
+                    <span className={`${compact ? 'px-2 py-1.5' : 'px-3 py-2'} rounded-lg border border-slate-200 bg-white text-slate-600`}>
                         Variante POS: <span className="font-black text-slate-800">{semantics.posVariant}</span>
                     </span>
-                    <span className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-600">
+                    <span className={`${compact ? 'px-2 py-1.5' : 'px-3 py-2'} rounded-lg border border-slate-200 bg-white text-slate-600`}>
                         Canal cloud: <span className="font-black text-slate-800">{semantics.cloudChannel}</span>
                     </span>
-                    <span className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-600">
+                    <span className={`${compact ? 'px-2 py-1.5' : 'px-3 py-2'} rounded-lg border border-slate-200 bg-white text-slate-600`}>
                         Fuente datos: <span className="font-black text-slate-800">{semantics.dataMaster}</span>
                     </span>
-                    <span className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-600">
+                    <span className={`${compact ? 'px-2 py-1.5' : 'px-3 py-2'} rounded-lg border border-slate-200 bg-white text-slate-600`}>
                         ERP cliente: <span className="font-black text-slate-800">{semantics.customerErpAccess ? 'SI' : 'NO'}</span>
                     </span>
                 </div>
@@ -4115,110 +4115,112 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
             )}
 
             {isEditModalOpen && editingTenant && (
-                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                            <h3 className="font-black text-lg text-slate-800">Editar Empresa</h3>
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-2rem)] overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col">
+                        <div className="px-5 py-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <h3 className="font-black text-base text-slate-800">Editar Empresa</h3>
                             <button type="button" onClick={closeEditModal} className="text-slate-400 hover:text-slate-700 transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
-                        <form onSubmit={handleUpdateTenant} className="p-6 space-y-5">
+                        <form onSubmit={handleUpdateTenant} className="min-h-0 overflow-y-auto p-4 sm:p-5 space-y-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">Nombre Comercial <span className="text-red-500">*</span></label>
+                                <label className="block text-xs font-bold text-slate-700 mb-1">Nombre Comercial <span className="text-red-500">*</span></label>
                                 <input
                                     required
                                     type="text"
                                     value={editFormData.name}
                                     onChange={e => setEditFormData({ ...editFormData, name: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-800"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm text-slate-800"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">Razón Social</label>
+                                <label className="block text-xs font-bold text-slate-700 mb-1">Razón Social</label>
                                 <input
                                     type="text"
                                     value={editFormData.legalName}
                                     onChange={e => setEditFormData({ ...editFormData, legalName: e.target.value })}
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-800"
+                                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm text-slate-800"
                                     placeholder="Opcional"
                                 />
                             </div>
+                            </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-1">RNC / Cédula</label>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">RNC / Cédula</label>
                                     <input
                                         type="text"
                                         value={editFormData.taxId}
                                         onChange={e => setEditFormData({ ...editFormData, taxId: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-800"
+                                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm text-slate-800"
                                         placeholder="Opcional"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-1">Teléfono</label>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">Teléfono</label>
                                     <input
                                         type="text"
                                         value={editFormData.phone}
                                         onChange={e => setEditFormData({ ...editFormData, phone: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-800"
+                                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm text-slate-800"
                                         placeholder="Opcional"
                                     />
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-1">Email de Acceso</label>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">Email de Acceso</label>
                                     <input
                                         type="email"
                                         value={editFormData.email}
                                         onChange={e => setEditFormData({ ...editFormData, email: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-800"
+                                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm text-slate-800"
                                         placeholder="admin@empresa.com"
                                     />
                                     <p className="text-[10px] text-slate-500 mt-1">Sincroniza con Supabase Auth.</p>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-slate-700 mb-1">Nueva Contraseña</label>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">Nueva Contraseña</label>
                                     <input
                                         type="password"
                                         value={editFormData.password}
                                         onChange={e => setEditFormData({ ...editFormData, password: e.target.value })}
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-slate-800"
+                                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm text-slate-800"
                                         placeholder="Dejar vacío para no cambiar"
                                     />
                                     <p className="text-[10px] text-slate-500 mt-1">Fuerza el cambio en el próximo acceso.</p>
                                 </div>
                             </div>
 
-                            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                                <div className="flex items-start justify-between gap-4">
+                            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                                <div className="flex items-center justify-between gap-3">
                                     <div>
                                         <p className="text-sm font-black text-slate-800">Productos Activos</p>
-                                        <p className="text-xs text-slate-500 mt-1">Activa o desactiva productos del tenant sin mezclarlo con los datos de empresa.</p>
+                                        <p className="text-[11px] text-slate-500">Productos y complementos contratados.</p>
                                     </div>
                                     <button
                                         type="button"
                                         onClick={openEditProductsModal}
-                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-slate-200 text-sm font-bold text-slate-700 hover:border-blue-200 hover:text-blue-700 transition-colors"
+                                        className="inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:border-blue-200 hover:text-blue-700 transition-colors"
                                     >
                                         <Boxes size={16} />
                                         Gestionar Productos
                                     </button>
                                 </div>
-                                <div className="mt-4">
-                                    {renderProductSummary(editFormData.products)}
+                                <div className="mt-2.5">
+                                    {renderProductSummary(editFormData.products, true)}
                                 </div>
                                 {canViewErpModules && editingTenant ? (
-                                    <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                                        <div className="flex items-start gap-3">
-                                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700"><Puzzle size={19} /></span>
+                                    <div className="mt-3 flex flex-col gap-2.5 border-t border-slate-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
+                                        <div className="flex items-center gap-2.5">
+                                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700"><Puzzle size={16} /></span>
                                             <div>
-                                                <p className="text-sm font-black text-slate-800">Módulos y licencias ERP</p>
-                                                <p className="mt-1 text-xs text-slate-500">
+                                                <p className="text-xs font-black text-slate-800">Módulos y licencias ERP</p>
+                                                <p className="text-[11px] leading-tight text-slate-500">
                                                     {editingTenantHasActiveErp
                                                         ? 'Administra RRHH, Nómina, Contabilidad e integraciones adicionales.'
                                                         : 'Activa ALFA-RMS y guarda el tenant para habilitar módulos adicionales.'}
@@ -4229,7 +4231,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                             type="button"
                                             onClick={() => setModuleStoreTenant(editingTenant)}
                                             disabled={!editingTenantHasActiveErp}
-                                            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-black text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                                            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-black text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300"
                                         >
                                             <Puzzle size={16} />
                                             {typeof activeModuleCounts[editingTenant.id] === 'number'
@@ -4240,18 +4242,18 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                 ) : null}
                             </div>
 
-                            <div className="pt-4 flex gap-3">
+                            <div className="pt-1 flex gap-3">
                                 <button
                                     type="button"
                                     onClick={closeEditModal}
-                                    className="flex-1 px-4 py-3 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold transition-colors"
+                                    className="flex-1 px-4 py-2.5 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg font-bold transition-colors"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isEditSubmitting}
-                                    className="flex-1 px-4 py-3 text-white bg-blue-600 hover:bg-blue-700 rounded-xl font-bold shadow-sm transition-colors disabled:opacity-70 flex items-center justify-center gap-2"
+                                    className="flex-1 px-4 py-2.5 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-bold shadow-sm transition-colors disabled:opacity-70 flex items-center justify-center gap-2"
                                 >
                                     {isEditSubmitting ? <><Loader2 size={18} className="animate-spin" /> Guardando...</> : 'Guardar Cambios'}
                                 </button>
