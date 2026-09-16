@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "product": "ALFA-ADMIN",
+  "sourceCommit": "REPLACE_WITH_CANDIDATE_SHA",
+  "scopeHash": "REPLACE_WITH_PLAN_SCOPE_HASH",
+  "developerIds": [
+    "REPLACE_WITH_AUTHOR_AGENT_ID"
+  ],
+  "risk": "HIGH",
+  "extraGates": [],
+  "records": [
+    {
+      "gate": "analysis",
+      "agentId": "REPLACE_WITH_INDEPENDENT_AGENT_ID",
+      "sourceCommit": "REPLACE_WITH_CANDIDATE_SHA",
+      "scopeHash": "REPLACE_WITH_PLAN_SCOPE_HASH",
+      "completedAt": "REPLACE_WITH_REAL_UTC_TIMESTAMP",
+      "result": "BLOCKED",
+      "summary": "Plantilla sin validación; completar todos los registros requeridos con evidencia real.",
+      "evidence": [
+        {
+          "path": "/REPLACE_WITH_REAL_ARCHIVED_EVIDENCE",
+          "sha256": "REPLACE_WITH_ACTUAL_FILE_SHA256"
+        }
+      ]
+    }
+  ]
+}

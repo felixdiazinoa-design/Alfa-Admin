@@ -1,0 +1,34 @@
+{
+  "product": "ALFA-ADMIN",
+  "rules": [
+    {
+      "name": "tenant",
+      "pattern": "(tenant|auth|user|role|permission|licens|provision|activation|terminal|device|supabase/)",
+      "risk": "HIGH",
+      "gates": [
+        "security",
+        "tenant-integrity",
+        "integration"
+      ]
+    },
+    {
+      "name": "apk",
+      "pattern": "(apk|release)",
+      "risk": "HIGH",
+      "gates": [
+        "security",
+        "integration"
+      ]
+    },
+    {
+      "name": "api",
+      "pattern": "(api/|supabase/functions/)",
+      "risk": "HIGH",
+      "gates": [
+        "security",
+        "tenant-integrity",
+        "integration"
+      ]
+    }
+  ]
+}
