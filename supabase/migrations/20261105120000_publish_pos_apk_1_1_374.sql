@@ -55,23 +55,25 @@ select
   'feature',
   'available',
   'Primera versión con EGO Club y CardNET en el mismo binario; el canal de actualizaciones ya apunta a ALFA-Admin.',
-  array[
+  -- En producción estas columnas son jsonb (202605232030_pos_apk_release_notes);
+  -- la migración 20260525093000 las declara TEXT[] pero es no-op si ya existen.
+  to_jsonb(array[
     'EGO Club: niveles de socio, canje en caja con código o tarjeta y reporte de venta al ERP.',
     'Tarjeta digital del socio con código QR.',
     'Pago con CardNET por ECR Ethernet (cobro, anulación, devolución y cierre de lote).',
     'Alta de socios sin conexión, con cola que se sincroniza al volver la red.'
-  ],
-  array[
+  ]::text[]),
+  to_jsonb(array[
     'El identificador de la caja se deriva de ANDROID_ID: reinstalar la APK conserva el mismo dispositivo y permite re-vincular sin reautorización manual.',
     'El canal de APK apunta a alfa-admin-nine; se elimina la referencia a cloud-admin-gamma del binario.',
     'Configuración de Supabase y ERP de producción embebida en la compilación.'
-  ],
-  array[
+  ]::text[]),
+  to_jsonb(array[
     'npx tsc -b sin errores.',
     'scripts/verify-ego-club-* 7/7 PASS.',
     'tests/cardnetEcrCodec + tests/posApkUpdateContract 30/30 PASS.',
     'Instalación verificada sobre 1.1.373 (misma firma CLIC POS, SHA-256 17746ded...).'
-  ],
+  ]::text[]),
   'Requiere Android 7.0 o superior (minSdk 24). Actualiza sobre 1.1.373 con la misma firma; no es necesario desinstalar.',
   'general',
   false
