@@ -386,6 +386,14 @@ export default async function handler(request: ApiRequest, response: ApiResponse
       return;
     }
 
+    // El RPC canónico solo autoriza un device que el registro considere "actual"
+    // (coalesce(current_device_id, device_id)). Tras reinstalar la APK ese campo
+    // queda apuntando al equipo anterior y la reconciliación es imposible, así
+    // que el desfase se adopta aquí, auditado y antes del RPC.
+    const effectiveCurrentDevice = text(registry.current_device_id) || text(registry.device_id);
+    const needsDeviceAdoption = !effectiveCurrentDevice
+      || effectiveCurrentDevice.toUpperCase() !== deviceId.toUpperCase();
+
     // 1. Destino ERP: explícito > catálogo > ERP del tenant.
     let target: ResolvedTarget | null = null;
     const explicitTerminal = text(body.erp_terminal_id);
@@ -502,6 +510,11 @@ export default async function handler(request: ApiRequest, response: ApiResponse
         device_id: deviceId,
         plan_hash: planHash,
         destructive_operations: destructive,
+        device_mismatch: {
+          current_device_id: effectiveCurrentDevice,
+          reported_device_id: deviceId,
+          will_adopt: needsDeviceAdoption,
+        },
         plan,
       });
       return;
@@ -518,7 +531,42 @@ export default async function handler(request: ApiRequest, response: ApiResponse
       return;
     }
 
-    // 3. Ejecución real.
+    // 3. Adoptar el device reportado si el registro quedó desfasado.
+    if (needsDeviceAdoption) {
+      const { error: adoptError } = await admin
+        .from('tenant_server_registry')
+        .update({ current_device_id: deviceId })
+        .eq('id', sourceRegistryId);
+      if (adoptError) {
+        sendJson(response, 500, {
+          error: 'DEVICE_ADOPTION_FAILED',
+          message: `No se pudo actualizar el device actual del registro: ${adoptError.message}`,
+          target,
+        });
+        return;
+      }
+      const { error: auditError } = await admin.from('terminal_device_audit').insert({
+        tenant_id: tenantId,
+        terminal_id: target.erp_terminal_uuid,
+        terminal_name: target.terminal_name || null,
+        old_device_id: effectiveCurrentDevice,
+        new_device_id: deviceId,
+        action: 'CLOUD_ADMIN_DEVICE_MISMATCH_DETECTED',
+        performed_by: actor.email,
+        reason,
+        result: 'SUCCESS',
+        metadata: {
+          source_registry_id: sourceRegistryId,
+          correlation_id: correlationId,
+          adopted_before_reconciliation: true,
+        },
+      });
+      if (auditError) {
+        console.error('terminal-bind: no se pudo auditar la adopción del device', auditError);
+      }
+    }
+
+    // 4. Ejecución real.
     const execute = await admin.rpc('reconcile_terminal_identity', {
       ...rpcCommon,
       ...rpcTarget,
@@ -526,9 +574,12 @@ export default async function handler(request: ApiRequest, response: ApiResponse
       p_dry_run: false,
     });
     if (execute.error) {
+      const scopeBlocked = execute.error.message.includes('AUTHORIZED_DEVICE_NOT_IN_RECONCILIATION_SCOPE');
       sendJson(response, errorStatus(execute.error.message), {
         error: execute.error.code || 'BIND_FAILED',
-        message: execute.error.message,
+        message: scopeBlocked
+          ? 'El registro de la terminal no reconoce este device como actual. Abre la caja, pulsa “Reintentar conexión” y vuelve a vincular.'
+          : execute.error.message,
         target,
         plan_hash: planHash,
       });
