@@ -440,6 +440,7 @@ export type CloudAdminPermissionKey =
     | 'licenses_view'
     | 'licenses_manage'
     | 'terminal_reauthorization'
+    | 'terminal_reconciliation'
     | 'audit_view';
 
 export type CloudAdminPermissions = Record<CloudAdminPermissionKey, boolean>;
