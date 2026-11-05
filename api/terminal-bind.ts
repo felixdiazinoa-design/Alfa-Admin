@@ -352,8 +352,8 @@ export default async function handler(request: ApiRequest, response: ApiResponse
       return;
     }
 
+    // El registro de sincronización vive en `landlord`, no en `public`.
     const { data: registryData, error: registryError } = await admin
-      .schema('public')
       .from('tenant_server_registry')
       .select('*')
       .eq('id', sourceRegistryId)
