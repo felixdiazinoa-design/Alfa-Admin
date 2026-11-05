@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Plus, Power, Edit3, Loader2, X, Boxes, Monitor, Wifi, WifiOff, Trash2, RefreshCcw, KeyRound, ShieldCheck, Ban, CheckCircle2, Unlink, Puzzle } from 'lucide-react';
+import { Search, Plus, Power, Edit3, Loader2, X, Boxes, Monitor, Wifi, WifiOff, Trash2, RefreshCcw, KeyRound, ShieldCheck, Ban, CheckCircle2, Unlink, Puzzle, Link2 } from 'lucide-react';
 import type { CloudAdminPermissions, Distributor, Tenant, TerminalAuthAttempt, TerminalFiscalReadiness, TerminalSyncDocument, TerminalSyncPendingResult, TenantTerminalErpReadiness, TenantTerminalSnapshot } from '../types';
-import { tenantService, type TerminalDeviceAuditEntry, type TenantPosLicenseSeats, type TerminalReconciliationResult, type ErpTerminalOption } from '../lib/tenantService';
+import { tenantService, type TerminalDeviceAuditEntry, type TenantPosLicenseSeats, type TerminalReconciliationResult, type ErpTerminalOption, type BindTerminalResult } from '../lib/tenantService';
 import { TenantProductsModal } from '../components/TenantProductsModal';
 import { ErpModuleStoreModal } from '../components/ErpModuleStoreModal';
 import { hasCloudAdminPermission } from '../lib/cloudAdminPermissions';
@@ -97,6 +97,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
     const [manualDeviceIds, setManualDeviceIds] = useState<Record<string, string>>({});
     const [reconciliationDrafts, setReconciliationDrafts] = useState<Record<string, ReconciliationDraft>>({});
     const [reconciliationSubmittingKey, setReconciliationSubmittingKey] = useState<string | null>(null);
+    const [bindSubmittingKey, setBindSubmittingKey] = useState<string | null>(null);
     const [posLicenseSeats, setPosLicenseSeats] = useState<TenantPosLicenseSeats | null>(null);
     const [fiscalReadinessByTerminal, setFiscalReadinessByTerminal] = useState<Record<string, TerminalFiscalReadiness>>({});
     const [fiscalReadinessLoadingKey, setFiscalReadinessLoadingKey] = useState<string | null>(null);
@@ -1137,6 +1138,73 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
             alert(getErrorMessage(error));
         } finally {
             setReconciliationSubmittingKey(null);
+        }
+    };
+
+    /**
+     * Vinculación en un paso.
+     *
+     * El servidor resuelve la terminal ERP y la sucursal, así que el operador no
+     * tiene que elegirlas. Primero se pide el dry-run y solo se ejecuta después
+     * de que el administrador confirme el destino y el device que se autoriza.
+     */
+    const handleBindTerminal = async (terminal: TenantTerminalSnapshot, deviceId: string) => {
+        if (!selectedTenantForTerminals || !terminal.registry?.id) {
+            alert('La terminal no tiene registro de sincronización; abre la caja y pulsa “Reintentar conexión” primero.');
+            return;
+        }
+        const key = getTerminalKey(terminal);
+        const request = {
+            tenantId: selectedTenantForTerminals.id,
+            sourceRegistryId: terminal.registry.id,
+            deviceId: deviceId || null,
+        };
+        setBindSubmittingKey(key);
+        try {
+            const preview = await tenantService.bindTerminalIdentity({ ...request, confirm: false });
+
+            if (preview.status === 'already_bound') {
+                alert(preview.message || 'La terminal ya estaba vinculada con este equipo.');
+                await refreshTerminalModalData();
+                return;
+            }
+            if (preview.status !== 'dry_run') {
+                alert(preview.message || 'No se pudo preparar la vinculación.');
+                return;
+            }
+
+            const destino = preview.target
+                ? `${preview.target.terminal_name || preview.target.erp_terminal_uuid} · sucursal ${preview.target.store_name || preview.target.erp_store_id}`
+                : 'N/D';
+            const confirmado = window.confirm(
+                `Vincular esta terminal\n\n`
+                + `Destino: ${destino}\n`
+                + `UUID ERP: ${preview.target?.erp_terminal_uuid || 'N/D'}\n`
+                + `Sucursal: ${preview.target?.erp_store_id || 'N/D'}\n`
+                + `Device a autorizar: ${preview.device_id || deviceId || 'N/D'}\n\n`
+                + `Se reemplaza el device autorizado y el POS podrá conectarse con este equipo. ¿Continuar?`,
+            );
+            if (!confirmado) return;
+
+            const done = await tenantService.bindTerminalIdentity({ ...request, confirm: true });
+            alert(done.status === 'already_bound'
+                ? 'La terminal ya estaba vinculada; no se repitieron escrituras.'
+                : 'Terminal vinculada. En el POS pulsa “Reintentar conexión”.');
+            await refreshTerminalModalData();
+        } catch (error) {
+            const payload = (error as Error & { payload?: BindTerminalResult | null }).payload || null;
+            if (payload?.error === 'ERP_TARGET_NOT_FOUND') {
+                alert(`${payload.message}\n\nDiagnóstico:\n${JSON.stringify(payload.diagnostics || {}, null, 2)}`);
+            } else if (payload?.error === 'ERP_TARGET_AMBIGUOUS') {
+                const lista = (payload.candidates || [])
+                    .map((candidate) => `· ${candidate.terminal_name || candidate.erp_terminal_uuid} (${candidate.erp_terminal_uuid} / ${candidate.erp_store_id})`)
+                    .join('\n');
+                alert(`${payload.message}\n\n${lista}\n\nUsa “Soporte avanzado” y elige el destino manualmente.`);
+            } else {
+                alert(getErrorMessage(error));
+            }
+        } finally {
+            setBindSubmittingKey(null);
         }
     };
 
@@ -2988,6 +3056,16 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                             </div>
                                                             {(isAdvancedOpen || hasActionableAuthIssue || posOnlyProvisioningBlocked || needsAuthorizedDeviceSync || detectedAuthorizationDeviceId || !hasOnlineRegistry) ? (
                                                             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => void handleBindTerminal(terminal, detectedAuthorizationDeviceId || posReportedDeviceId || authorizedDeviceId)}
+                                                                    disabled={bindSubmittingKey === terminalKey || !terminal.registry?.id}
+                                                                    title="Resuelve la terminal ERP y la sucursal automáticamente y autoriza el equipo que reporta el POS"
+                                                                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                                                >
+                                                                    {bindSubmittingKey === terminalKey ? <Loader2 size={16} className="animate-spin" /> : <Link2 size={16} />}
+                                                                    Vincular esta terminal
+                                                                </button>
                                                                 {posOnlyProvisioningBlocked ? (
                                                                     <button
                                                                         type="button"

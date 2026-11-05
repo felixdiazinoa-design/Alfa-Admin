@@ -2175,6 +2175,73 @@ export async function requestTerminalReconciliation(
     return payload || { status: "success", correlation_id: input.correlationId };
 }
 
+export type BindTerminalResult = {
+    status: 'bound' | 'dry_run' | 'already_bound' | string;
+    message?: string;
+    device_id?: string;
+    plan_hash?: string | null;
+    target?: {
+        erp_terminal_uuid: string;
+        erp_store_id: string;
+        terminal_name?: string | null;
+        store_name?: string | null;
+        source?: string;
+    } | null;
+    candidates?: Array<{ erp_terminal_uuid: string; erp_store_id: string; terminal_name?: string | null; store_name?: string | null }>;
+    blockers?: string[];
+    destructive_operations?: string[];
+    plan?: Record<string, unknown> | null;
+    diagnostics?: Record<string, unknown>;
+    result?: Record<string, unknown>;
+    error?: string;
+};
+
+/**
+ * Vinculación de terminal en un solo paso.
+ *
+ * El servidor resuelve el destino ERP (registro → catálogo → ERP), valida el
+ * plan canónico y, con `confirm`, ejecuta la reconciliación autorizando el
+ * device que reporta el POS. Sin `confirm` solo devuelve el dry-run.
+ */
+export async function bindTerminalIdentity(input: {
+    tenantId: string;
+    sourceRegistryId: string;
+    deviceId?: string | null;
+    erpTerminalId?: string | null;
+    erpStoreId?: string | null;
+    reason?: string | null;
+    confirm?: boolean;
+}): Promise<BindTerminalResult> {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) throw new Error("Sesión administrativa requerida para vincular terminales.");
+
+    const response = await fetch("/api/terminal-bind", {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            tenant_id: input.tenantId,
+            source_registry_id: input.sourceRegistryId,
+            device_id: input.deviceId || null,
+            erp_terminal_id: input.erpTerminalId || null,
+            erp_store_id: input.erpStoreId || null,
+            reason: input.reason || null,
+            confirm: input.confirm === true,
+        }),
+    });
+
+    const payload = await response.json().catch(() => null) as BindTerminalResult | null;
+    if (!response.ok) {
+        const error = new Error(payload?.message || payload?.error || "No se pudo vincular la terminal.");
+        (error as Error & { payload?: BindTerminalResult | null }).payload = payload;
+        throw error;
+    }
+    return payload || { status: "success" };
+}
+
 export type TenantPosLicenseSeats = {
     usedSeats: number;
     maxSeats: number;
@@ -2791,6 +2858,7 @@ export const tenantService = {
     getTerminalDeviceAudit,
     requestTerminalDeviceAction,
     requestTerminalReconciliation,
+    bindTerminalIdentity,
     syncTerminalAuthorizedDevice,
     enforceTenantPosLicenseLimits,
     getTenantPosLicenseSeats,
