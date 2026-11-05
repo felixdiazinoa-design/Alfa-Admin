@@ -10,6 +10,7 @@ const permissions: Record<string, string> = {
     get_tenants: 'tenants_view',
     get_distributors: 'tenants_view',
     get_tenant_terminal_overview: 'tenants_view',
+    get_tenant_erp_terminal_options: 'tenants_view',
     get_terminal_device_audit: 'tenants_view',
     get_tenant_pos_license_seats: 'licenses_view',
     get_dashboard_stats: 'dashboard_view',
@@ -59,6 +60,7 @@ async function execute(action: string, payload: Record<string, unknown>, admin: 
         case 'get_tenants': return tenantService.getTenants();
         case 'get_distributors': return tenantService.getDistributors();
         case 'get_tenant_terminal_overview': return tenantService.getTenantTerminalOverview(text(payload.tenantId, 'tenantId'));
+        case 'get_tenant_erp_terminal_options': return tenantService.getTenantErpTerminalOptions(text(payload.tenantId, 'tenantId'));
         case 'get_terminal_device_audit': return tenantService.getTerminalDeviceAudit(text(payload.tenantId, 'tenantId'), text(payload.terminalId, 'terminalId'), Number(payload.limit) || 20);
         case 'get_tenant_pos_license_seats': return tenantService.getTenantPosLicenseSeats(text(payload.tenantId, 'tenantId'));
         case 'get_dashboard_stats': return tenantService.getDashboardStats();
