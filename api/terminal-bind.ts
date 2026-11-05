@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 /**
@@ -439,7 +440,8 @@ export default async function handler(request: ApiRequest, response: ApiResponse
 
     const reason = text(body.reason)
       || `Vinculación automática desde el panel: ${sourceRegistryId} → ${target.erp_terminal_uuid} (device ${deviceId}).`;
-    const correlationId = `bind-${sourceRegistryId}-${Date.now()}`;
+    // p_correlation_id es uuid en el RPC: un id compuesto revienta con 22P02.
+    const correlationId = randomUUID();
     const rpcCommon = {
       p_tenant_id: tenantId,
       p_reason: reason,
