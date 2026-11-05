@@ -471,12 +471,14 @@ export default async function handler(request: ApiRequest, response: ApiResponse
       return;
     }
 
-    const plan = (dryRun.data || {}) as Record<string, unknown>;
-    const planHash = text(plan.plan_hash);
-    const blockers = Array.isArray(plan.blockers) ? plan.blockers : [];
+    // El RPC devuelve el detalle dentro de `plan` (el plan_hash va fuera).
+    const dryRunData = (dryRun.data || {}) as Record<string, unknown>;
+    const planHash = text(dryRunData.plan_hash);
+    const plan = (dryRunData.plan as Record<string, unknown> | null) || {};
     const destructive = Array.isArray(plan.destructive_operations) ? plan.destructive_operations : [];
-    const alreadyBound = plan.is_noop === true
-      || (Array.isArray(plan.writes) && plan.writes.length === 0 && blockers.length === 0 && destructive.length === 0);
+    const orphanRegistryIds = Array.isArray(plan.orphan_registry_ids) ? plan.orphan_registry_ids : [];
+    const previousDevice = text(plan.previous_authorized_device_id);
+    const alreadyBound = previousDevice?.toUpperCase() === deviceId.toUpperCase() && orphanRegistryIds.length === 0;
 
     if (alreadyBound) {
       sendJson(response, 200, {
@@ -484,6 +486,7 @@ export default async function handler(request: ApiRequest, response: ApiResponse
         message: 'La terminal ya estaba vinculada con este device; no se escribió nada.',
         target,
         device_id: deviceId,
+        plan_hash: planHash,
         plan,
       });
       return;
@@ -496,18 +499,16 @@ export default async function handler(request: ApiRequest, response: ApiResponse
         target,
         device_id: deviceId,
         plan_hash: planHash,
-        blockers,
         destructive_operations: destructive,
         plan,
       });
       return;
     }
 
-    if (blockers.length || destructive.length) {
+    if (destructive.length) {
       sendJson(response, 409, {
         error: 'PLAN_BLOCKED',
-        message: 'El plan tiene bloqueos o escrituras destructivas; no se ejecutó.',
-        blockers,
+        message: 'El plan incluye escrituras destructivas; no se ejecutó.',
         destructive_operations: destructive,
         target,
         plan,
