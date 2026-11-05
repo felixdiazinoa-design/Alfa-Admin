@@ -3066,6 +3066,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                     {bindSubmittingKey === terminalKey ? <Loader2 size={16} className="animate-spin" /> : <Link2 size={16} />}
                                                                     Vincular esta terminal
                                                                 </button>
+                                                                {isAdvancedOpen ? (<>
                                                                 {posOnlyProvisioningBlocked ? (
                                                                     <button
                                                                         type="button"
@@ -3127,6 +3128,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                         Reparar enlace ERP
                                                                     </button>
                                                                 ) : null}
+                                                                </>) : null}
                                                             </div>
                                                             ) : null}
                                                         </div>
@@ -3139,7 +3141,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                             <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 px-3 py-3 text-sm text-amber-900">
                                                                 <p className="font-bold">{identity.reconciliationWarning}</p>
                                                                 <p className="mt-1">{CANONICAL_ERP_IDENTITY_REQUIRED_MESSAGE}</p>
-                                                                <details className="mt-3 rounded-lg border border-amber-200 bg-white/70 p-3">
+                                                                {isAdvancedOpen ? (<details className="mt-3 rounded-lg border border-amber-200 bg-white/70 p-3">
                                                                     <summary className="cursor-pointer font-bold">Vista previa de reconciliación (dry-run)</summary>
                                                                     <div className="mt-3 grid gap-2 md:grid-cols-2">
                                                                         <select
@@ -3248,7 +3250,11 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                             <p className="md:col-span-2 font-mono text-[10px] break-all">Plan hash: {reconciliationDraft.serverPreview?.plan_hash}</p>
                                                                         </div>
                                                                     ) : null}
-                                                                </details>
+                                                                </details>) : (
+                                                                    <p className="mt-3 rounded-lg border border-amber-200 bg-white/70 px-3 py-2 text-xs font-semibold text-amber-900">
+                                                                        Usa “Vincular esta terminal”: el destino ERP, la sucursal y el device se resuelven automáticamente.
+                                                                    </p>
+                                                                )}
                                                             </div>
                                                         ) : null}
 
@@ -3543,6 +3549,9 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                         ) : authAttempts.length === 0 ? (
                                                             <div className="px-3 py-4 text-sm opacity-75">
                                                                 <p>No hay solicitudes de dispositivo reportadas por el ERP para esta terminal.</p>
+                                                                <p className="mt-2 text-xs font-semibold">
+                                                                    Si la caja no puede entrar, usa “Vincular esta terminal” en la pestaña Resumen: autoriza el equipo actual sin esperar una solicitud del ERP.
+                                                                </p>
                                                             </div>
                                                         ) : (
                                                             <div className="overflow-x-auto">
