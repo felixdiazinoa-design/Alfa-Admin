@@ -1263,6 +1263,46 @@ export async function getDistributors(): Promise<Distributor[]> {
     return (data as Distributor[]) || [];
 }
 
+export interface ErpTerminalOption {
+    erp_terminal_uuid: string;
+    erp_store_id: string;
+    erp_store_name: string | null;
+    name: string;
+}
+
+/**
+ * Lista las terminales ERP canónicas del tenant (con su sucursal) para poder
+ * reconciliar un registro de catálogo/huérfano aunque no exista otra terminal
+ * "ya vinculada" en el catálogo cloud.
+ *
+ * Es el fallback del selector "Terminal ERP destino" del panel de reconciliación.
+ */
+export async function getTenantErpTerminalOptions(tenantId: string): Promise<ErpTerminalOption[]> {
+    if (isBrowserRuntime) return invokeAdminCommand("get_tenant_erp_terminal_options", { tenantId });
+    const bindings = await loadErpTerminalBindings(tenantId);
+    const seen = new Set<string>();
+    const options: ErpTerminalOption[] = [];
+
+    for (const binding of bindings.values()) {
+        const uuid = binding.erpTerminalId?.trim() || '';
+        const storeId = binding.storeId?.trim() || '';
+        if (!uuid || !storeId || !isUuidLike(uuid)) continue;
+
+        const key = `${uuid}|${storeId}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+
+        options.push({
+            erp_terminal_uuid: uuid,
+            erp_store_id: storeId,
+            erp_store_name: binding.storeName?.trim() || null,
+            name: binding.displayName?.trim() || binding.terminalCode?.trim() || uuid,
+        });
+    }
+
+    return options;
+}
+
 export async function getTenantTerminalOverview(tenantId: string): Promise<TenantTerminalSnapshot[]> {
     if (isBrowserRuntime) return invokeAdminCommand("get_tenant_terminal_overview", { tenantId });
     const [terminalsRes, registryRes, tenantRes] = await Promise.all([
@@ -1336,7 +1376,15 @@ export async function getTenantTerminalOverview(tenantId: string): Promise<Tenan
     };
     const getExplicitRegistryErpId = (registry?: TenantTerminalRegistryEntry | null) => {
         const readiness = registry?.erp_readiness || {};
-        const value = firstText(readiness.terminalId, readiness.terminal_id);
+        // Un registro cuyo `terminal_id` YA es el UUID canónico del ERP debe resolver su
+        // vínculo aunque no tenga `erp_readiness` (caso típico: caja re-vinculada tras
+        // reinstalar la APK). Sin esto la terminal queda "sin vínculo ERP" y el panel
+        // bloquea la reautorización porque no puede prellenar terminal/sucursal.
+        const value = firstText(
+            readiness.terminalId,
+            readiness.terminal_id,
+            isUuidLike(registry?.terminal_id) ? registry?.terminal_id : null,
+        );
         return isUuidLike(value) ? value : null;
     };
     const getHumanTerminalCode = (terminal?: Terminal | null, binding?: ErpTerminalBinding | null) => {
@@ -2731,6 +2779,7 @@ export const tenantService = {
     deleteTenant,
     getDistributors,
     getTenantTerminalOverview,
+    getTenantErpTerminalOptions,
     requestTerminalTakeover,
     requestTerminalLocalRebuild,
     requestTerminalErpReadiness,

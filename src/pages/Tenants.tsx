@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Plus, Power, Edit3, Loader2, X, Boxes, Monitor, Wifi, WifiOff, Trash2, RefreshCcw, KeyRound, ShieldCheck, Ban, CheckCircle2, Unlink, Puzzle } from 'lucide-react';
 import type { CloudAdminPermissions, Distributor, Tenant, TerminalAuthAttempt, TerminalFiscalReadiness, TerminalSyncDocument, TerminalSyncPendingResult, TenantTerminalErpReadiness, TenantTerminalSnapshot } from '../types';
-import { tenantService, type TerminalDeviceAuditEntry, type TenantPosLicenseSeats, type TerminalReconciliationResult } from '../lib/tenantService';
+import { tenantService, type TerminalDeviceAuditEntry, type TenantPosLicenseSeats, type TerminalReconciliationResult, type ErpTerminalOption } from '../lib/tenantService';
 import { TenantProductsModal } from '../components/TenantProductsModal';
 import { ErpModuleStoreModal } from '../components/ErpModuleStoreModal';
 import { hasCloudAdminPermission } from '../lib/cloudAdminPermissions';
@@ -72,6 +72,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
     const [activeModuleCounts, setActiveModuleCounts] = useState<Record<string, number>>({});
     const [selectedTenantForTerminals, setSelectedTenantForTerminals] = useState<Tenant | null>(null);
     const [tenantTerminals, setTenantTerminals] = useState<TenantTerminalSnapshot[]>([]);
+    const [erpTerminalOptions, setErpTerminalOptions] = useState<ErpTerminalOption[]>([]);
     const [terminalSearchTerm, setTerminalSearchTerm] = useState('');
     const [terminalStoreFilter, setTerminalStoreFilter] = useState('ALL');
     const [terminalRequestFilter, setTerminalRequestFilter] = useState<TerminalRequestFilter>('ALL');
@@ -411,6 +412,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
     const openTerminalModal = async (tenant: Tenant) => {
         setSelectedTenantForTerminals(tenant);
         setTenantTerminals([]);
+        setErpTerminalOptions([]);
         setTerminalSearchTerm('');
         setTerminalStoreFilter('ALL');
         setTerminalRequestFilter('ALL');
@@ -431,15 +433,20 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                 console.warn('POS license enforcement skipped or failed:', enforceErr);
             }
 
-            const [data, availableRelease, seats] = await Promise.all([
+            const [data, availableRelease, seats, erpOptions] = await Promise.all([
                 tenantService.getTenantTerminalOverview(tenant.id),
                 getLatestAvailablePosApkRelease().catch((releaseErr) => {
                     console.warn('Latest POS APK release unavailable; terminal catalog will continue loading:', releaseErr);
                     return null;
                 }),
                 tenantService.getTenantPosLicenseSeats(tenant.id).catch(() => null),
+                tenantService.getTenantErpTerminalOptions(tenant.id).catch((erpErr) => {
+                    console.warn('ERP terminal options unavailable for reconciliation:', erpErr);
+                    return [];
+                }),
             ]);
             setTenantTerminals(data);
+            setErpTerminalOptions(erpOptions);
             setPosLicenseSeats(seats);
             setLatestPosApkRelease(availableRelease);
             if (canReauthorizeTerminals) {
@@ -2743,9 +2750,36 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                             serverPreview: null,
                                         };
                                         const reconciliationPreview = buildTerminalReconciliationPreview(terminal, reconciliationDraft);
-                                        const canonicalTerminalOptions = tenantTerminals.filter((candidate) => (
-                                            candidate.id !== terminal.id && hasCanonicalErpBinding(candidate)
-                                        ));
+                                        const canonicalTerminalOptions = (() => {
+                                            const seen = new Set<string>();
+                                            const options: Array<{ id: string; name: string; erp_terminal_uuid: string; erp_store_id: string }> = [];
+                                            const push = (option: { id: string; name: string; erp_terminal_uuid: string; erp_store_id: string }) => {
+                                                const key = `${option.erp_terminal_uuid}|${option.erp_store_id}`;
+                                                if (!option.erp_terminal_uuid || seen.has(key)) return;
+                                                seen.add(key);
+                                                options.push(option);
+                                            };
+                                            tenantTerminals
+                                                .filter((candidate) => candidate.id !== terminal.id && hasCanonicalErpBinding(candidate))
+                                                .forEach((candidate) => push({
+                                                    id: candidate.id,
+                                                    name: candidate.name,
+                                                    erp_terminal_uuid: candidate.erp_terminal_uuid || '',
+                                                    erp_store_id: candidate.erp_store_id || '',
+                                                }));
+                                            // Fallback: terminales ERP del tenant, para que el selector
+                                            // no quede vacío cuando no hay otra terminal cloud ya vinculada
+                                            // (caso de una caja re-vinculada tras reinstalar la APK).
+                                            erpTerminalOptions
+                                                .filter((option) => option.erp_terminal_uuid !== (terminal.erp_terminal_uuid || ''))
+                                                .forEach((option) => push({
+                                                    id: option.erp_terminal_uuid,
+                                                    name: option.name,
+                                                    erp_terminal_uuid: option.erp_terminal_uuid,
+                                                    erp_store_id: option.erp_store_id,
+                                                }));
+                                            return options;
+                                        })();
                                         const serverReconciliationPlan = reconciliationDraft.serverPreview?.plan;
                                         const isReconciliationSubmitting = reconciliationSubmittingKey === terminalKey;
                                         const authorizedDeviceId = identity.authorizedDeviceId !== 'N/D' ? identity.authorizedDeviceId : '';
