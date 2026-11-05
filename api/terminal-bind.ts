@@ -238,15 +238,43 @@ async function resolveFromCatalog(
     config.store_id,
     row.erp_store_id,
   ];
-  const storeId = storeCandidates.map(text).find((value) => value && UUID_LIKE.test(value)) || null;
+  let storeId = storeCandidates.map(text).find((value) => value && UUID_LIKE.test(value)) || null;
+  let terminalName = text(row.name);
+  let storeName: string | null = null;
+
+  // Si el catálogo no guarda la sucursal, se deriva desde el propio ERP: la
+  // terminal ERP conoce su store_id. Así el panel no depende de que el vínculo
+  // `erp_tenants.config.cloudAdminTenantId` esté bien poblado.
+  const { data: erpTerminal } = await admin
+    .schema('public')
+    .from('erp_terminals')
+    .select('id,store_id,name')
+    .eq('id', uuid)
+    .maybeSingle();
+  const erpRow = (erpTerminal as Record<string, unknown> | null) || null;
+  if (erpRow) {
+    storeId = storeId || text(erpRow.store_id);
+    terminalName = terminalName || text(erpRow.name);
+    const erpStoreId = text(erpRow.store_id);
+    if (erpStoreId) {
+      const { data: storeRow } = await admin
+        .schema('public')
+        .from('erp_stores')
+        .select('name')
+        .eq('id', erpStoreId)
+        .maybeSingle();
+      storeName = text((storeRow as { name?: string } | null)?.name);
+    }
+  }
+
   if (!storeId) return null;
 
   return {
     erp_terminal_uuid: uuid,
     erp_store_id: storeId,
     erp_tenant_id: null,
-    terminal_name: text(row.name),
-    store_name: null,
+    terminal_name: terminalName,
+    store_name: storeName,
     source: 'catalog_metadata',
   };
 }
