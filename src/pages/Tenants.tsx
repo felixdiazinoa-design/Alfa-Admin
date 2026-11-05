@@ -3101,6 +3101,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                         type="button"
                                                                         onClick={() => void handleAuthorizeDeviceForManualInput(terminal, detectedAuthorizationDeviceId)}
                                                                         disabled={canonicalActionBlocked || deviceActionSubmittingKey === manualAuthorizeKey}
+                                                                        title={canonicalActionBlocked ? CANONICAL_ERP_IDENTITY_REQUIRED_MESSAGE : undefined}
                                                                         className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-900 shadow-sm hover:bg-amber-100 transition-colors disabled:opacity-60"
                                                                     >
                                                                         {deviceActionSubmittingKey === manualAuthorizeKey ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
@@ -3121,6 +3122,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                         type="button"
                                                                         onClick={() => void handleRepairErpDeviceMapping(terminal)}
                                                                         disabled={canonicalActionBlocked || !authorizedDeviceId || deviceActionSubmittingKey === repairErpSubmittingKey}
+                                                                        title={canonicalActionBlocked ? CANONICAL_ERP_IDENTITY_REQUIRED_MESSAGE : undefined}
                                                                         className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
                                                                     >
                                                                         {deviceActionSubmittingKey === repairErpSubmittingKey ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
@@ -3329,6 +3331,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                 type="button"
                                                                 onClick={() => void handleClearTerminalDevices(terminal)}
                                                                 disabled={canonicalActionBlocked || deviceActionSubmittingKey === clearDevicesSubmittingKey}
+                                                                title={canonicalActionBlocked ? CANONICAL_ERP_IDENTITY_REQUIRED_MESSAGE : undefined}
                                                                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-red-700 shadow-sm hover:bg-red-50 transition-colors disabled:opacity-60"
                                                             >
                                                                 {deviceActionSubmittingKey === clearDevicesSubmittingKey ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
@@ -3353,6 +3356,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                         type="button"
                                                                         onClick={() => void handleAuthorizeDeviceForManualInput(terminal, manualDeviceIds[terminalKey] || '')}
                                                                         disabled={canonicalActionBlocked || !manualDeviceId || deviceActionSubmittingKey === manualAuthorizeKey}
+                                                                        title={canonicalActionBlocked ? CANONICAL_ERP_IDENTITY_REQUIRED_MESSAGE : undefined}
                                                                         className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-amber-700 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                                                                     >
                                                                         {deviceActionSubmittingKey === manualAuthorizeKey ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
@@ -3471,7 +3475,9 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                                                 type="button"
                                                                                                 onClick={() => void handleAuthorizeDeviceForManualInput(terminal, rowDeviceId)}
                                                                                                 disabled={canonicalActionBlocked || deviceActionSubmittingKey !== null}
-                                                                                                title={`Autoriza ${rowDeviceId} para ${terminal.name} y revoca el device activo anterior.`}
+                                                                                                title={canonicalActionBlocked
+                                                                                                    ? CANONICAL_ERP_IDENTITY_REQUIRED_MESSAGE
+                                                                                                    : `Autoriza ${rowDeviceId} para ${terminal.name} y revoca el device activo anterior.`}
                                                                                                 className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1.5 text-[10px] font-bold uppercase text-emerald-900 hover:bg-emerald-100 transition-colors disabled:opacity-60"
                                                                                             >
                                                                                                 {deviceActionSubmittingKey === authorizeRowKey
@@ -3579,6 +3585,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                                                         type="button"
                                                                                                         onClick={() => void handleReauthorizeAttempt(terminal, attempt)}
                                                                                                         disabled={canonicalActionBlocked || deviceActionSubmittingKey !== null}
+                                                                                                        title={canonicalActionBlocked ? CANONICAL_ERP_IDENTITY_REQUIRED_MESSAGE : undefined}
                                                                                                         className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-red-700 disabled:opacity-60"
                                                                                                     >
                                                                                                         {deviceActionSubmittingKey === reauthorizeKey ? <Loader2 size={13} className="animate-spin" /> : <ShieldCheck size={13} />}
@@ -3659,6 +3666,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                 type="button"
                                                                 onClick={() => void handleRevokePreviousDevice(terminal, revokeDeviceId)}
                                                                 disabled={canonicalActionBlocked || deviceActionSubmittingKey === revokeSubmittingKey}
+                                                                title={canonicalActionBlocked ? CANONICAL_ERP_IDENTITY_REQUIRED_MESSAGE : undefined}
                                                                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors disabled:opacity-60"
                                                             >
                                                                 {deviceActionSubmittingKey === revokeSubmittingKey ? <Loader2 size={16} className="animate-spin" /> : <Ban size={16} />}

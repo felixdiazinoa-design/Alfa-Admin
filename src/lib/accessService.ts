@@ -19,6 +19,7 @@ export const permissionCatalog: Array<{ key: CloudAdminPermissionKey; group: str
     { key: 'licenses_view', group: 'Licencias ERP', label: 'Consultar', description: 'Ver módulos y límites contratados por tenant.' },
     { key: 'licenses_manage', group: 'Licencias ERP', label: 'Gestionar', description: 'Activar módulos y modificar sus límites.' },
     { key: 'terminal_reauthorization', group: 'Terminales', label: 'Reautorizar dispositivos', description: 'Aprobar o rechazar reemplazos de dispositivos POS.' },
+    { key: 'terminal_reconciliation', group: 'Terminales', label: 'Reconciliar identidad', description: 'Vincular registros huérfanos con la terminal y sucursal ERP canónicas.' },
     { key: 'support_view', group: 'HelpDesk', label: 'Consultar', description: 'Ver tickets y conversaciones.' },
     { key: 'support_manage', group: 'HelpDesk', label: 'Gestionar', description: 'Responder, asignar y resolver tickets.' },
     { key: 'knowledge_view', group: 'Manuales', label: 'Consultar', description: 'Consultar manuales y videos.' },

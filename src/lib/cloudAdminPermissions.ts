@@ -30,6 +30,9 @@ const legacyPermissionFallback: Partial<Record<CloudAdminPermissionKey, CloudAdm
     profiles_manage: 'users',
     licenses_view: 'plans_view',
     licenses_manage: 'plans_manage',
+    // La reconciliación se agregó después; quien ya reautoriza dispositivos
+    // puede reconciliar sin esperar una migración de perfiles.
+    terminal_reconciliation: 'terminal_reauthorization',
 };
 
 export function hasCloudAdminPermission(

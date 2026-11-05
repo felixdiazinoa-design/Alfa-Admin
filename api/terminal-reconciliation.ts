@@ -121,11 +121,17 @@ export default async function handler(request: ApiRequest, response: ServerRespo
         if (adminError) throw adminError;
         const actor = adminData as AdminRow | null;
         const profile = relation(actor?.cloud_admin_profiles);
+        // `terminal_reconciliation` no existía en el catálogo de permisos de la UI,
+        // así que ningún perfil podía recibirlo salvo sembrándolo en BD. Se acepta
+        // `terminal_reauthorization` como equivalente: reconciliar es reautorizar
+        // un device contra la identidad canónica.
+        const canReconcile = profile?.permissions?.terminal_reconciliation === true
+            || profile?.permissions?.terminal_reauthorization === true;
         if (
             !actor
             || actor.status !== "active"
             || profile?.is_active !== true
-            || profile.permissions?.terminal_reconciliation !== true
+            || !canReconcile
         ) {
             sendJson(response, 403, {
                 error: "FORBIDDEN",
