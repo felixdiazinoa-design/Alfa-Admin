@@ -3058,7 +3058,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => void handleBindTerminal(terminal, detectedAuthorizationDeviceId || posReportedDeviceId || authorizedDeviceId)}
+                                                                    onClick={() => void handleBindTerminal(terminal, posReportedDeviceId || detectedAuthorizationDeviceId || authorizedDeviceId)}
                                                                     disabled={bindSubmittingKey === terminalKey || !terminal.registry?.id}
                                                                     title="Resuelve la terminal ERP y la sucursal automáticamente y autoriza el equipo que reporta el POS"
                                                                     className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition-colors hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -3066,6 +3066,8 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                     {bindSubmittingKey === terminalKey ? <Loader2 size={16} className="animate-spin" /> : <Link2 size={16} />}
                                                                     Vincular esta terminal
                                                                 </button>
+                                                                <details className="w-full rounded-xl border border-slate-200 bg-white/70 px-3 py-2 text-sm sm:w-auto">
+                                                                    <summary className="cursor-pointer font-bold text-slate-600">Opciones avanzadas</summary>
                                                                 {isAdvancedOpen ? (<>
                                                                 {posOnlyProvisioningBlocked ? (
                                                                     <button
@@ -3131,6 +3133,7 @@ export const Tenants: React.FC<{ permissions?: Partial<CloudAdminPermissions> | 
                                                                     </button>
                                                                 ) : null}
                                                                 </>) : null}
+                                                            </details>
                                                             </div>
                                                             ) : null}
                                                         </div>
