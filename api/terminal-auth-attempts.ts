@@ -31,6 +31,8 @@ type AuthAttempt = {
     [key: string]: unknown;
 };
 
+const DEFAULT_ERP_BASE_URL = "https://alfa-rms.vercel.app";
+
 const tokenKeys = new Set([
     "syncAuthToken",
     "sync_auth_token",
@@ -56,15 +58,6 @@ function sendJson(response: ServerResponse, statusCode: number, body: unknown) {
     response.statusCode = statusCode;
     response.setHeader("Content-Type", "application/json");
     response.end(JSON.stringify(body));
-}
-
-function getEnv(...names: string[]) {
-    for (const name of names) {
-        const value = process.env[name];
-        if (value) return value;
-    }
-
-    throw new Error(`Missing required environment variable: ${names.join(" or ")}`);
 }
 
 function stringValue(value: unknown) {
@@ -273,8 +266,21 @@ export default async function handler(request: ApiRequest, response: ServerRespo
             return;
         }
 
-        const erpApiUrl = getEnv("ERP_API_URL", "CLOUD_ADMIN_ERP_API_URL").replace(/\/$/, "");
-        const erpServiceToken = getEnv("ERP_TAKEOVER_SERVICE_TOKEN", "ERP_SERVICE_TOKEN", "CLOUD_ADMIN_ERP_SERVICE_TOKEN");
+        // El endpoint de intentos del ERP responde sin Bearer, así que estas
+        // variables son opcionales: sin ERP_API_URL se usa el ERP de producción
+        // y sin token se llama sin Authorization. Así el panel no queda muerto
+        // por configuración pendiente.
+        const erpApiUrl = (
+            process.env.ERP_API_URL
+            || process.env.CLOUD_ADMIN_ERP_API_URL
+            || DEFAULT_ERP_BASE_URL
+        ).replace(/\/$/, "");
+        const erpServiceToken = (
+            process.env.ERP_TAKEOVER_SERVICE_TOKEN
+            || process.env.ERP_SERVICE_TOKEN
+            || process.env.CLOUD_ADMIN_ERP_SERVICE_TOKEN
+            || ""
+        ).trim();
 
         const { data: tenantData, error: tenantError } = await admin
             .from("tenants")
@@ -298,7 +304,7 @@ export default async function handler(request: ApiRequest, response: ServerRespo
         const erpResponse = await fetch(`${erpApiUrl}/api/sync/terminals/${encodeURIComponent(terminalId)}/auth-attempts`, {
             method: "GET",
             headers: {
-                Authorization: `Bearer ${erpServiceToken}`,
+                ...(erpServiceToken ? { Authorization: `Bearer ${erpServiceToken}` } : {}),
                 "Content-Type": "application/json",
                 "X-Tenant-Id": tenantId,
                 "X-Cloud-Admin-Tenant-Id": tenantId,
